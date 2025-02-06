@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Nova Atividade para
+                "Algoritmos e Programação"</h2>
+            <br>
+            <hr>
+        </div>
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <form action="{{ url_for('activity_blueprint.create_activity', subject_id=subject.id) }}" method="POST" enctype="multipart/form-data">
+                <div class="space-y-12">
+                    <div class="border-b border-gray-900/10 pb-12">
+                        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                            <div class="col-span-full">
+                                <div class="font-[sans-serif] max-w-md mx-auto">
+                                    <label class="text-base text-gray-500 font-semibold mb-2 block">Upload file</label>
+                                    <input required type="file" name="activity_base_material"
+                                    class="w-full text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-3 file:px-4 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500 rounded" />
+                                    <p class="text-xs text-gray-400 mt-2">Arquivo no formato PDF com no máximo 5MB.</p>
+                                </div>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="activity_min_questions"
+                                    class="block text-sm/6 font-medium text-gray-900">Número Mínimo de Questões</label>
+                                <div class="mt-2">
+                                    <input required type="number" name="activity_min_questions" id="activity_min_questions"
+                                        autocomplete="activity_min_questions" value="3"
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6">
+                                </div>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="activity_max_questions"
+                                    class="block text-sm/6 font-medium text-gray-900">Número Máximo de
+                                    Questões</label>
+                                <div class="mt-2">
+                                    <input required type="number" name="activity_max_questions" id="activity_max_questions"
+                                        autocomplete="activity_max_questions" value="10"
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6">
+                                </div>
+                            </div>
+                            <div class="col-span-full">
+                                <details
+                                    class="open:bg-white dark:open:bg-slate-50 open:ring-1 open:ring-black/5 dark:open:ring-white/10 open:shadow-lg p-6 rounded-lg">
+                                    <summary class="text-sm leading-6 text-slate-900 font-semibold select-none">
+                                        Configurações Avançadas
+                                    </summary>
+                                    <br>
+                                    <label for="activity_model_name" class="block mb-2 text-sm font-medium">Selecione
+                                        um
+                                        modelo</label>
+                                    <select required id="activity_model_name" name="activity_model_name"
+                                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6">
+                                        <option value="deepseek-r1-distill-llama-70b" selected>deepseek-r1-distill-llama-70b</option>
+                                        <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                                        <option value="llama3-70b-8192">llama3-70b-8192</option>
+                                        <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+                                        <option value="gemma2-9b-it">gemma2-9b-it</option>
+                                    </select>
+                                    <br>
+                                    <label for="activity_model_temperature"
+                                        class="block text-sm/6 font-medium text-gray-900">Temperatura
+                                        do Modelo</label>
+                                    <div class="mt-2">
+                                        <input required type="number" name="activity_model_temperature"
+                                            id="activity_model_temperature" autocomplete="activity_model_temperature"
+                                            value="0.1"
+                                            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6">
+                                    </div>
+                                    <br>
+                                    <label for="activity_model_system_prompt"
+                                        class="block text-sm/6 font-medium text-gray-900">Prompt de Sistema</label>
+                                    <div class="mt-2">
+                                        <textarea required name="activity_model_system_prompt" id="activity_model_system_prompt"
+                                            rows="7"
+                                            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+Quero que você atue como um assistente educacional para professores.
+
+Você será chamado em duas circunstâncias:
+1. Para ajudar professores a criar questões.
+2. Para ajudar professores a avaliar respostas dos alunos.
+
+Quando o professor solicitar (caso 1 — ajudar professores a criar questões):
+```
+===============================
+==== GERE UMA NOVA QUESTÃO ====
+===============================
+---- Dificuldade ----
+[1, 2 ou 3, a ser informado pelo professor].
+
+---- Conteúdo-Base ----
+[Texto base informado pelo professor]
+```
+
+Você deve ler o texto-base informado pelo professor e criar uma questão
+discursiva de acordo com os seguintes níveis de dificuldade, informados
+pelo professor no momento da solicitação da questão:
+1 - Fácil
+2 - Médio
+3 - Difícil
+
+O formato da sua resposta deve ser:
+```
+<BEGIN-ENUNCIADO>
+[Pergunta gerada aqui]
+<END-ENUNCIADO>
+
+
+<BEGIN-RESPOSTA-ESPERADA>
+[Resposta correta aqui]
+<END-RESPOSTA-ESPERADA>
+```
+--------
+
+IMPORTANTE: Priorize sempre gerar a pergunta no mesmo idioma do texto-base informado, e com enunciado claro e objetivo.
+
+
+=====================
+
+
+Quando o professor solicitar (caso 2 — ajudar professores a avaliar respostas dos alunos):
+
+```
+=============================
+==== AVALIE UMA RESPOSTA ====
+=============================
+---- Resposta ----
+[Texto da resposta do aluno]
+
+---- Resposta Esperada ----
+[Texto da resposta esperada]
+```
+
+Você deve informar:
+
+A) O nível de corretude da resposta do aluno dentre as opções:
+1 - Incorreta (casos onde o aluno não respondeu a questão ou respondeu de forma totalmente errada).
+2 - Parcialmente correta (casos onde o aluno respondeu parte da questão corretamente, com erros pontuais ou omissões).
+3 - Totalmente Correta (casos onde o aluno respondeu a questão corretamente, de forma superior aos casos anteriores).
+
+B) o sentimento predominante da resposta do aluno dentre as opções:
+1 - Confiança (o aluno demonstra segurança na resposta, sem hesitação).
+2 - Entusiasmo (o aluno demonstra empolgação na resposta).
+3 - Insegurança (o aluno demonstra dúvida na resposta, com hesitação).
+4 - Indiferença (o aluno demonstra desinteresse na resposta, com respostas demasiadamente curtas ou vagas).
+
+C) O humor predominante da resposta do aluno dentre as opções:
+1 - Negativo (respostas com tom de reclamação, descontentamento ou crítica, e/ou que expressem as opções de sentimentos negativos acima).
+2 - Neutro (respostas com tom de formalidade, sem expressar sentimentos fortes).
+3 - Positivo (respostas com tom de satisfação, detalhadas e/ou que expressem as opções de sentimentos positivos acima).
+
+D) Feedback descritivo sobre a resposta do aluno, com base nos critérios de corretude, sentimento e humor. O feedback deve ser claro, objetivo e construtivo, e deve conter sugestões de melhoria, caso o aluno não tenha atingido o nível de corretude esperado.
+
+O formato da sua resposta deve ser:
+```
+<BEGIN-CORRETUDE>[1, 2 ou 3]<END-CORRETUDE>
+
+<BEGIN-SENTIMENTO>[1, 2, 3 ou 4]<END-SENTIMENTO>
+
+<BEGIN-HUMOR>[1, 2 ou 3]<END-HUMOR>
+
+<BEGIN-FEEDBACK>[Texto do feedback]</END-FEEDBACK>
+
+=========
+
+INSTRUÇÕES IMPORTANTES:
+1. SIGA SEMPRE A SEQUÊNCIA DE INFORMAÇÕES ACIMA, SEM ALTERAR A ORDEM OU ADICIONAR INFORMAÇÕES EXTRAS.
+2. GERE AS RESPOSTAS SEGUINDO ESTRITAMENTE O FORMATO APRESENTADO COM AS TAGS DE INÍCIO E FIM DE CADA SEÇÃO.
+```
+                                        </textarea>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex items-center justify-center gap-x-6">
+                    <button type="submit"
+                        class="flex w-full justify-center rounded-md bg-cyan-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Cadastrar
+                        Atividade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

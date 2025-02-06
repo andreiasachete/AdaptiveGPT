@@ -1,0 +1,13 @@
+====> TÍTULO: [AdaptiveGPT] Aqui estão suas credenciais
+Olá, {user_name}!
+
+Você está recebendo este e-mail porque sua conta foi criada com sucesso no AdaptiveGPT.
+
+Aqui estão suas credenciais de login:
+
+E-mail: {user_email}
+Senha: {user_password}
+
+
+Atenciosamente,
+Equipe AdaptiveGPT

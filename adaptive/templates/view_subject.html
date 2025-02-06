@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Turma <span
+                class="text-cyan-600">{{ subject.name }}</span></h2>
+        <br>
+        <a href="{{ url_for('subject_blueprint.new_subject_student', subject_id=subject.id) }}"
+            class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Gerenciar
+            Estudantes</a>
+        <a href="{{ url_for('activity_blueprint.new_activity', subject_id=subject.id) }}"
+            class="rounded-md bg-lime-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-lime-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-800">Cadastrar
+            Atividade</a>
+        <br><br>
+        <hr>
+        <div class="flex flex-wrap -mx-3 mb-5">
+            <div class="w-full max-w-full px-3 mb-6  mx-auto">
+                <div
+                    class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                    <div
+                        class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                        <div
+                            class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                            <h3
+                                class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                <span class="mr-3 font-semibold text-dark">Estudantes</span>
+                                <span class="mt-1 font-medium text-secondary-dark text-lg/normal">Lista com todos os
+                                    estudantes da
+                                    turma.</span>
+                            </h3>
+                        </div>
+                        <div class="flex-auto block py-8 pt-6 px-9">
+                            <div class="overflow-x-auto">
+                                <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                    <thead class="align-bottom">
+                                        <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                            <th class="pb-3 text-start min-w-[175px]">Nome</th>
+                                            <th class="pb-3 text-end min-w-[100px]">E-mail</th>
+                                            <th class="pb-3 text-end min-w-[100px]">Questões Respondidas</th>
+                                            <th class="pb-3 pr-12 text-end min-w-[175px]">Porcentagem de Acerto</th>
+                                            <th class="pb-3 text-end min-w-[50px]">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in subject.students %}
+                                        <tr class="border-b border-dashed last:border-b-0">
+                                            <td class="p-3 pl-0">
+                                                <div class="flex items-center">
+                                                    <div class="flex flex-col justify-start">
+                                                        <span
+                                                            class="mb-1 font-semibold text-lg/normal text-secondary-inverse">{{
+                                                            student.name }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                    student.email }}</span>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                    student.questions_answered|length }}</span>
+                                            </td>
+                                            <td class="p-3 pr-12 text-end">
+                                                {% if student.percentage_of_questions_answered_correctly < 50 %} <span
+                                                    class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg">
+                                                    {{
+                                                    student.percentage_of_questions_answered_correctly }}%</span>
+                                                    {% elif student.percentage_of_questions_answered_correctly >= 50 and
+                                                    student.percentage_of_questions_answered_correctly < 70 %} <span
+                                                        class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">
+                                                        {{
+                                                        student.percentage_of_questions_answered_correctly }}%</span>
+                                                        {% else %}
+                                                        <span
+                                                            class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">
+                                                            {{
+                                                            student.percentage_of_questions_answered_correctly
+                                                            }}%</span>
+                                                        {% endif %}
+                                            </td>
+                                            <td class="p-4 pr-0 text-end">
+                                                <form action="{{ url_for('subject_blueprint.remove_subject_student', subject_id=subject.id, student_id=student.id) }}"
+                                                    method="POST">
+                                                    <a href="{{ url_for('subject_blueprint.view_student_progress', subject_id=subject.id, student_id=student.id) }}"
+                                                        class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Ver
+                                                        Detalhes <span aria-hidden="true">→</span></a>
+                                                    <button type="submit" formmethod="post"
+                                                        class="rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Remover
+                                                    da Turma</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="flex flex-wrap -mx-3 mb-5">
+            <div class="w-full max-w-full px-3 mb-6  mx-auto">
+                <div
+                    class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                    <div
+                        class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                        <div
+                            class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                            <h3
+                                class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                <span class="mr-3 font-semibold text-dark">Atividades</span>
+                                <span class="mt-1 font-medium text-secondary-dark text-lg/normal">Lista com todas as
+                                    atividades cadastradas para a
+                                    turma.</span>
+                            </h3>
+                        </div>
+                        <div class="flex-auto block py-8 pt-6 px-9">
+                            <div class="overflow-x-auto">
+                                <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                    <thead class="align-bottom">
+                                        <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                            <th class="pb-3 text-start min-w-[175px]">Material-Base</th>
+                                            <th class="pb-3 text-end min-w-[100px]">Alunos Respondentes</th>
+                                            <th class="pb-3 text-end min-w-[100px]">Porcentagem de Acertos</th>
+                                            <th class="pb-3 text-end min-w-[100px]">Modelo</th>
+                                            <th class="pb-3 text-end min-w-[50px]">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for activity in subject.activities %}
+                                        <tr class="border-b border-dashed last:border-b-0">
+                                            <td class="p-3 pl-0">
+                                                <div class="flex items-center">
+                                                    <div class="flex flex-col justify-start">
+                                                        <a href="{{ url_for('static', filename='uploads/'+activity.base_material) }}" target="_blank" class="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary">
+                                                            {{ activity.base_material }}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                    activity.respondents|length }}</span>
+                                            </td>
+                                            <td class="p-3 pr-12 text-end">
+                                                <!--
+                                                                                                In the span component below, the text and background colors are set according to the percentage of correct answers.
+                                                
+                                                                                                Options:
+                                                                                                ==> 0-49%: text-danger bg-danger-light
+                                                                                                ==> 50-69%: text-primary bg-primary-light
+                                                                                                ==> 70-100%: text-success bg-success-light                                                 
+                                                                                                -->
+                                                {% if activity.avg_respondent_correctness < 50 %} <span
+                                                    class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg">
+                                                    {{
+                                                    activity.avg_respondent_correctness }}%</span>
+                                                    {% elif activity.avg_respondent_correctness >= 50 and
+                                                    activity.avg_respondent_correctness < 70 %} <span
+                                                        class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">
+                                                        {{
+                                                        activity.avg_respondent_correctness }}%</span>
+                                                        {% else %}
+                                                        <span
+                                                            class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">
+                                                            {{
+                                                            activity.avg_respondent_correctness
+                                                            }}%</span>
+                                                        {% endif %}
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span
+                                                    class="font-semibold text-light-inverse text-md/normal text-end">{{
+                                                    activity.model_name }}</span>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <form action="{{ url_for('activity_blueprint.remove_activity', subject_id=subject.id, activity_id=activity.id) }}"
+                                                    method="POST">
+                                                    <a href="{{ url_for('activity_blueprint.view_activity', subject_id=subject.id, activity_id=activity.id) }}"
+                                                        class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Ver
+                                                        Detalhes <span aria-hidden="true">→</span></a>
+                                                    <button type="submit" formmethod="post"
+                                                        class="rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Excluir</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+    
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Olá, <span class="text-cyan-500">{{ student.name }}</span>!</h2>
+        <p class="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8">Abaixo estão as trajetórias que você ainda não completou. Clique em "Responder" para iniciar cada atividade.</p>
+        <br><br>
+    </div>
+
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap -mx-3 mb-5">
+            <div class="w-full max-w-full px-3 mb-6  mx-auto">
+                <div
+                    class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                    <div
+                        class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                        <div
+                            class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                            <h3
+                                class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                <span class="mr-3 font-semibold text-dark">Trajetórias</span>
+                                <span class="mt-1 font-medium text-secondary-dark text-lg/normal">Lista com todas as trajetórias ativas.</span>
+                            </h3>
+                        </div>
+                        <div class="flex-auto block py-8 pt-6 px-9">
+                            <div class="overflow-x-auto">
+                                <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                    <thead class="align-bottom">
+                                        <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                            <th class="pb-3 text-start min-w-[150px]">Material-Base</th>
+                                            <th class="pb-3 text-start min-w-[100px]">Dificuldade</th>
+                                            <th class="pb-3 text-start min-w-[250px]">Enunciado</th>
+                                            <th class="pb-3 text-center min-w-[60px]">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for trajectory in active_trajectories %}
+                                            <tr class="border-b border-dashed last:border-b-0">
+                                                <td class="p-3 pl-0">
+                                                    <div class="flex items-center">
+                                                        <div class="flex flex-col justify-start">
+                                                            <a href="{{ url_for('static', filename='uploads/'+trajectory.activity.base_material) }}" target="_blank" class="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary">
+                                                                {{ trajectory.activity.base_material }}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="p-3 pr-0 text-start">
+                                                    <span class="font-semibold text-light-inverse text-md/normal">
+                                                        {{ trajectory.last_unanswered_question.difficulty }}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3 pr-0 text-start">
+                                                    <span class="font-semibold text-light-inverse text-md/normal">
+                                                        {{ trajectory.last_unanswered_question.body }}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3 pr-0 text-center">
+                                                    <button data-modal-target="modal_trajectory_{{ loop.index }}" data-modal-toggle="modal_trajectory_{{ loop.index }}" class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600" type="button">
+                                                        Responder
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <!-- Main modal -->
+                                            <div id="modal_trajectory_{{ loop.index }}" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                                <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                                    <!-- Modal content -->
+                                                    <form class="space-y-4" action="{{ url_for('activity_blueprint.analyze_answer', question_id=trajectory.last_unanswered_question.id) }}" method="POST">
+                                                    <div class="relative bg-white rounded-lg shadow-sm">
+                                                        <!-- Modal header -->
+                                                        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200">
+                                                            <h3 class="text-xl font-semibold text-gray-900">
+                                                                Disciplina <span class="text-cyan-500">{{ trajectory.activity.subject.name }}</span>
+                                                            </h3>
+                                                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="modal_trajectory_{{ loop.index }}">
+                                                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                                                </svg>
+                                                                <span class="sr-only">Fechar Janela Flutuante</span>
+                                                            </button>
+                                                        </div>
+                                                        <!-- Modal body -->
+                                                        <div class="p-4 md:p-5 space-y-4">
+                                                            <p class="text-base leading-relaxed text-gray-500">
+                                                                {{ trajectory.last_unanswered_question.body }}
+                                                            </p>
+                                                            <div>
+                                                                <label for="question_answer" class="block mb-2 text-sm font-medium text-gray-900">Sua Resposta</label>
+                                                                <textarea required name="question_answer" id="question_answer"
+                                                                    rows="7" class="text-start block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Modal footer -->
+                                                        <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                                                            <button type="submit" class="m-2 rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Enviar Resposta</button>
+                                                            <button data-modal-hide="modal_trajectory_{{ loop.index }}" type="button" class="m-2 rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Cancelar</button>
+                                                        </div>
+                                                        </form>
+                                                    </div>
+                                            </div>
+                                            </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</body>
+
+</html>

@@ -172,3 +172,6 @@ cython_debug/
 
 # AWS access key
 ec2_key.pem
+
+# Temporary OS files
+.DS_Store

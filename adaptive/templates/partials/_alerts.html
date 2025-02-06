@@ -1,0 +1,9 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="p-4 mb-4 text-lg text-{% if category == 'error' %}red{% elif category == 'warning' %}yellow{% elif category == 'success' %}green{% endif %}-700 bg-{% if category == 'error' %}red{% elif category == 'warning' %}yellow{% elif category == 'success' %}green{% endif %}-100 rounded-lg" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}

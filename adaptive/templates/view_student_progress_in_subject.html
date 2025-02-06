@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+    
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Desempenho de <span class="text-cyan-500">{{ student.name }}</span> na disciplina <span class="text-cyan-500">{{ subject.name }}</span></h2>
+        <p class="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8">Abaixo estão os detalhes do desempenho de <span class="text-cyan-500">{{ student.name }}</span> na disciplina <span class="text-cyan-500">{{ subject.name }}</span>. Primeiramente, é apresentado o desempenho geral na disciplina, seguido pelo desempenho por atividade.</p>
+        <br><br>
+    </div>
+    
+    <div class="container mx-auto px-4">
+        <br><br>
+        <h3 class="text-2xl font-bold text-gray-900">Desempenho Geral na Disciplina</h3>
+        <br><br>
+        
+        <div class="grid grid-cols-3 gap-5">
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Corretude das Respostas</h4>
+                <br>
+                <div id="piechart_overall_answercorrectness"></div>
+            </div>
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Sentimentos das Respostas</h4>
+                <br>
+                <div id="barchart_overall_answersentiment"></div>
+            </div>
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Humores das Respostas</h4>
+                <br>
+                <div id="columnchart_overall_answerhumor"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">        
+        <br><br><br>
+        <hr>
+        <br><br>
+        <h3 class="text-2xl font-bold text-gray-900">Desempenho por Atividade</h3>
+        {% for trajectory in trajectories %}
+            <div class="flex flex-wrap -mx-3 mb-5">
+                <div class="w-full max-w-full px-3 mb-6  mx-auto">
+                    <div
+                        class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                        <div
+                            class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                            <div
+                                class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                                <h3
+                                    class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                    <span class="mr-3 font-semibold text-dark"><strong>Atividade {{ trajectory.activity.id }}</strong></span>
+                                    <span class="mt-1 text-dark text-lg/normal"><strong>Material-Base:</strong> {{ trajectory.activity.base_material }}</span>
+                                    <span class="mt-1 text-dark text-lg/normal"><strong>Questões Respondidas (Total):</strong> {{ trajectory.questions_answered }}</span>
+                                    <span class="mt-1 text-dark text-lg/normal"><strong>Acertos:</strong> {{ trajectory.fully_correct_answers }} ({{ trajectory.percentage_fully_correct_answers }}%)</span>
+                                </h3>
+                            </div>
+                            <div class="flex-auto block py-8 pt-6 px-9">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                        <thead class="align-bottom">
+                                            <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                                <th class="pb-3 text-start min-w-[50px]">ID</th>
+                                                <th class="pb-3 text-start min-w-[200px]">Enunciado</th>
+                                                <th class="pb-3 text-end min-w-[100px]">Corretude da Resposta</th>
+                                                <th class="pb-3 pr-12 text-end min-w-[175px]">Sentimento da Resposta</th>
+                                                <th class="pb-3 pr-12 text-end min-w-[175px]">Humor da Resposta</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for question in trajectory.questions %}
+                                                <tr class="border-b border-dashed last:border-b-0">
+                                                    <td class="p-3 pl-0">
+                                                        <div class="flex items-center">
+                                                            <div class="flex flex-col justify-start">
+                                                                <span
+                                                                    class="mb-1 font-semibold text-lg/normal text-secondary-inverse">{{
+                                                                    loop.index }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="pb-3 pr-12 text-start min-w-[175px]">
+                                                        {{ question.body }}
+                                                    </td>
+                                                    <td class="p-3 pr-0 text-end">
+                                                        {% if question.student_answer is none %}
+                                                            <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
+                                                        {% elif question.student_answer.correctness == 1 %}
+                                                            <span
+                                                                class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">Correta</span>
+                                                        {% elif question.student_answer.correctness == 0.5 %}
+                                                            <span
+                                                                class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">Parcialmente Correta</span>
+                                                        {% else %}
+                                                            <span
+                                                                class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg">Incorreta</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="pb-3 pr-12 text-end min-w-[175px]">
+                                                        {% if question.student_answer is none %}
+                                                            N/A
+                                                        {% else %}
+                                                            {{ question.student_answer.sentiment }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="pb-3 pr-12 text-end min-w-[175px]">
+                                                        {% if question.student_answer is none %}
+                                                            N/A
+                                                        {% else %}
+                                                            {{ question.student_answer.humor }}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        
+        
+    </div>
+
+    <script>
+        var percentage_fully_correct_answers = {{student.percentage_fully_correct_answers | tojson }}
+        var percentage_partially_correct_answers = {{student.percentage_partially_correct_answers | tojson }}
+        var percentage_incorrect_answers = {{student.percentage_incorrect_answers | tojson }}
+        var options = {
+            series: [percentage_fully_correct_answers, percentage_partially_correct_answers, percentage_incorrect_answers],
+            chart: {
+                type: 'pie',
+                toolbar: {
+                    show: true,
+                    offsetX: 0,
+                    offsetY: 0,
+                    tools: {
+                        download: true 
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            labels: ['Respostas Totalmente Corretas', 'Respostas Parcialmente Corretas', 'Respostas Incorretas'],
+            fill: {
+                colors: ['#A3F3FD', '#0092B8', '#124E65']
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#piechart_overall_answercorrectness"), options);
+        chart.render();
+    </script>
+    <script>
+        var sentiment_names = {{student.sentiment_names | tojson }}
+        var number_of_answers_per_sentiment = {{student.number_of_answers_per_sentiment | tojson }}
+        var options = {
+            series: [{
+                data: number_of_answers_per_sentiment
+            }],
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        position: 'top'
+                    },
+                    borderRadius: 4,
+                    borderRadiusApplication: 'end',
+                    horizontal: true,
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -20
+            },
+            xaxis: {
+                categories: sentiment_names,
+            },
+            fill: {
+                colors: ['#007595']
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#barchart_overall_answersentiment"), options);
+        chart.render();
+    </script>
+    <script>
+        var humor_names = {{student.humor_names | tojson }}
+        var number_of_answers_per_humor = {{student.number_of_answers_per_humor | tojson }}
+        var options = {
+        series: [
+            {
+                name: "Humor das Respostas",
+                data: number_of_answers_per_humor,
+            },
+        ],
+        chart: {
+            height: 350,
+            type: "bar",
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 2,
+                dataLabels: {
+                    position: "top",
+                },
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            offsetY: 10,
+        },
+        xaxis: {
+            categories: humor_names,
+            position: "bottom",
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+            crosshairs: {
+                fill: {
+                    type: "gradient",
+                    gradient: {
+                        colorFrom: "#D8E3F0",
+                        colorTo: "#BED1E6",
+                        stops: [0, 100],
+                        opacityFrom: 0.4,
+                        opacityTo: 0.5,
+                    },
+                },
+            },
+            tooltip: {
+                enabled: true,
+            },
+        },
+        yaxis: {
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+        },
+        fill: {
+            colors: ['#007595']
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#columnchart_overall_answerhumor"), options);
+    chart.render();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+    
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-gray-900">Atividade <span class="text-cyan-600">{{ activity.id }}</span></h2>
+        <br>
+        <h3 class="text-lg font-normal text-gray-900"><strong>Material-Base:</strong> <a href="{{ url_for('static', filename='uploads/'+activity.base_material) }}" target="_blank" class="mb-1 transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary">{{ activity.base_material }}</a></h3>
+        <h3 class="text-lg font-normal text-gray-900"><strong>Mínimo de Questões:</strong> {{ activity.min_questions }}</h3>
+        <h3 class="text-lg font-normal text-gray-900"><strong>Máximo de Questões:</strong> {{ activity.max_questions }}</h3>
+        <details
+        class="open:bg-white open:ring-1 open:ring-black/5 open:shadow-lg p-6 rounded-lg">
+            <summary class="text-sm leading-6 text-slate-900 font-semibold select-none">
+                Configurações Avançadas
+            </summary>
+            <br>
+            <h3 class="text-lg font-normal text-gray-900"><strong>Modelo:</strong> {{ activity.model_name }}</h3>
+            <h3 class="text-lg font-normal text-gray-900"><strong>Temperatura:</strong> {{ activity.model_temperature }}</h3>
+            <br>
+            <h3 class="text-lg font-normal text-gray-900"><strong>Prompt de Sistema:</strong><div class="whitespace-pre-wrap">{{ activity.model_system_prompt }}</div></h3>
+        </details>
+        <br>
+        <form action="{{ url_for('activity_blueprint.remove_activity', subject_id=subject.id, activity_id=activity.id) }}"
+        method="POST">
+        <button type="submit" formmethod="post"
+                class="rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Excluir Atividade</button>
+        </form>
+        <br><br>
+        <hr>
+    </div>
+
+    <div class="container mx-auto px-4">
+        <br><br>
+        <h3 class="text-2xl font-bold text-gray-900">Visão Geral do <span class="text-cyan-600">Desempenho dos Alunos</span></h3>
+        <br><br>
+        
+        <div class="grid grid-cols-3 gap-5">
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Corretude das Respostas</h4>
+                <br>
+                <div id="piechart_overall_answercorrectness"></div>
+            </div>
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Sentimentos das Respostas</h4>
+                <br>
+                <div id="barchart_overall_answersentiment"></div>
+            </div>
+            <div class="text-center border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-5">
+                <h4 class="text-2xl font-bold text-gray-900">Humores das Respostas</h4>
+                <br>
+                <div id="columnchart_overall_answerhumor"></div>
+            </div>
+        </div>
+    </div>
+    <br><br>
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Trajetória dos Estudantes</h2>
+        <br><br>
+        <hr>
+        <div class="flex flex-wrap -mx-3 mb-5">
+            <div class="w-full max-w-full px-3 mb-6 mx-auto">
+                <div
+                    class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                    <div
+                        class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                        <div
+                            class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                            <h3
+                                class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                <span class="mr-3 font-semibold text-dark">Estudantes</span>
+                                <span class="mt-1 font-medium text-secondary-dark text-lg/normal">Visão geral das trajetórias dos estudantes.</span>
+                                <span class="mt-4 mb-4 font-bold text-lg/normal">Legenda:</span>
+                                <!-- Caption of the icons included in the trajectory representation -->
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Humor Negativo
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/humor_negative.png') }}" alt="Bad Mood Icon" class="mx-auto h-12 w-auto">
+                                    </div>
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Humor Neutro
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/humor_neutral.png') }}" alt="Neutral Mood Icon" class="mx-auto h-12 w-auto">
+                                    </div>
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Humor Neutro
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/humor_positive.png') }}" alt="Positive Mood Icon" class="mx-auto h-12 w-auto">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Dificuldade Fácil
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/difficulty1.png') }}" alt="Difficulty Icon" class="mx-auto h-8 w-15">
+                                    </div>
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Dificuldade Média
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/difficulty2.png') }}" alt="Difficulty Icon" class="mx-auto h-8 w-15">
+                                    </div>
+                                    <div class="text-center" style="width: 180px">
+                                        <span class="text-sm font-bold text-gray-600">
+                                            Dificuldade Difícil
+                                        </span>
+                                        <img src="{{ url_for('static', filename='img/difficulty3.png') }}" alt="Difficulty Icon" class="mx-auto h-8 w-15">
+                                    </div>
+                                </div>
+                            </h3>
+                        </div>
+                        <br><br>
+                        <div class="flex-auto block py-8 pt-6 px-9">
+                            <div class="overflow-x-auto">
+                                <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                    <thead class="align-bottom">
+                                        <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                            <th class="pb-3 text-start min-w-[150px]">Nome</th>
+                                            <th class="pb-3 text-start min-w-[500px]">Trajetória</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for trajectory in activity.trajectories %}
+                                        <tr class="border-b border-dashed last:border-b-0">
+                                            <td class="p-3 pl-0">
+                                                <div class="flex items-center">
+                                                    <div class="flex flex-col justify-start">
+                                                        <a href="javascript:void(0)"
+                                                            class="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary">{{
+                                                            trajectory.student.name }}</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3 pr-0 text-start">
+                                                <div class="flex gap-0">
+                                                    {% for question in trajectory.questions %}
+                                                        {% if question.student_answer != none %}
+                                                            <div style="width: 95px" class="{{ question.bg_color }} border border-gray-300 rounded-2xl shadow-md p-2 flex flex-col items-center text-center">
+                                                                <img src="{{ url_for('static', filename=question.humor_image) }}" alt="Mood Icon" class="mx-auto h-12 w-auto">
+                                                                <div class="flex space-x-1 mb-2">
+                                                                    <img src="{{ url_for('static', filename=question.difficulty_image) }}" alt="Star" class="mx-auto h-4 w-auto">
+                                                                </div>
+                                                                <p class="text-black font-bold text-sm">{{ question.student_answer.sentiment }}</p>
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="font-semibold">N/A</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">        
+        <br><br><br>
+        <hr>
+        <br><br>
+        <h3 class="text-2xl font-bold text-gray-900">Questões da Atividade</h3>
+        <br><br>
+        <details>
+            <summary class="text-sm leading-6 text-slate-900 font-semibold select-none">
+                Visualizar Questões
+            </summary>
+            {% for question in questions %}
+            <div class="border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30 p-10 m-10">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-base/7 font-semibold text-gray-900">Questão {{ loop.index }} ({{question.difficulty_name}})</h3>
+                </div>
+                <div class="mt-6 border-t border-gray-100">
+                    <dl class="divide-y divide-gray-100">
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Aluno</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{{ question.trajectory.student.name }}</dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Texto-Base</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{{ question.text_chunk.content }}</dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Enunciado</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{{ question.body }}</dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Resposta Esperada</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{{ question.answer }}</dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Resposta Informada</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                        {% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.content }} {% endif %}
+                        </dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Corretude</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                        {% if question.student_answer is none %}
+                        <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
+                        {% elif question.student_answer.correctness == 1 %}
+                        <span
+                            class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg"
+                            >Correta</span
+                        >
+                        {% elif question.student_answer.correctness == 0.5 %}
+                        <span
+                            class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg"
+                            >Parcialmente Correta</span
+                        >
+                        {% else %}
+                        <span
+                            class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg"
+                            >Incorreta</span
+                        >
+                        {% endif %}
+                        </dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Sentimento</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                        {% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.sentiment }} {% endif %}
+                        </dd>
+                    </div>
+                    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm/6 font-medium text-gray-900">Humor</dt>
+                        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                        {% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.humor }} {% endif %}
+                        </dd>
+                    </div>
+                    </dl>
+                </div>
+            </div>
+        {% endfor %}
+        </details>
+        <br><br><br>
+    </div>
+
+    <script>
+        var percentage_fully_correct_answers = {{activity.percentage_fully_correct_answers | tojson }}
+        var percentage_partially_correct_answers = {{activity.percentage_partially_correct_answers | tojson }}
+        var percentage_incorrect_answers = {{activity.percentage_incorrect_answers | tojson }}
+        var options = {
+            series: [percentage_fully_correct_answers, percentage_partially_correct_answers, percentage_incorrect_answers],
+            chart: {
+                type: 'pie',
+                toolbar: {
+                    show: true,
+                    offsetX: 0,
+                    offsetY: 0,
+                    tools: {
+                        download: true 
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            labels: ['Respostas Totalmente Corretas', 'Respostas Parcialmente Corretas', 'Respostas Incorretas'],
+            fill: {
+                colors: ['#A3F3FD', '#0092B8', '#124E65']
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#piechart_overall_answercorrectness"), options);
+        chart.render();
+    </script>
+    <script>
+        var sentiment_names = {{activity.sentiment_names | tojson }}
+        var number_of_answers_per_sentiment = {{activity.number_of_answers_per_sentiment | tojson }}
+        var options = {
+            series: [{
+                data: number_of_answers_per_sentiment
+            }],
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        position: 'top'
+                    },
+                    borderRadius: 4,
+                    borderRadiusApplication: 'end',
+                    horizontal: true,
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                offsetX: -20
+            },
+            xaxis: {
+                categories: sentiment_names,
+            },
+            fill: {
+                colors: ['#007595']
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#barchart_overall_answersentiment"), options);
+        chart.render();
+    </script>
+    <script>
+        var humor_names = {{activity.humor_names | tojson }}
+        var number_of_answers_per_humor = {{activity.number_of_answers_per_humor | tojson }}
+        var options = {
+        series: [
+            {
+                name: "Humor das Respostas",
+                data: number_of_answers_per_humor,
+            },
+        ],
+        chart: {
+            height: 350,
+            type: "bar",
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 2,
+                dataLabels: {
+                    position: "top",
+                },
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            offsetY: 10,
+        },
+        xaxis: {
+            categories: humor_names,
+            position: "bottom",
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+            crosshairs: {
+                fill: {
+                    type: "gradient",
+                    gradient: {
+                        colorFrom: "#D8E3F0",
+                        colorTo: "#BED1E6",
+                        stops: [0, 100],
+                        opacityFrom: 0.4,
+                        opacityTo: 0.5,
+                    },
+                },
+            },
+            tooltip: {
+                enabled: true,
+            },
+        },
+        yaxis: {
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+        },
+        fill: {
+            colors: ['#007595']
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#columnchart_overall_answerhumor"), options);
+    chart.render();
+    </script>
+
+</body>
+
+</html>

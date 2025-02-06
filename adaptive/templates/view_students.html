@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+
+<head>
+    {% include "partials/_header.html" %}
+</head>
+
+<body class="h-full">
+    <header class="bg-white">
+        {% include "partials/_navbar.html" %}
+        {% include "partials/_alerts.html" %}
+    </header>
+    <br><br>
+
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Todos Estudantes</h2>
+        <br>
+        <a href="{{ url_for('teacher_blueprint.new_student') }}"
+            class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Cadastrar
+            Estudante</a>
+        <br><br>
+        <hr>
+        <div class="flex flex-wrap -mx-3 mb-5">
+            <div class="w-full max-w-full px-3 mb-6  mx-auto">
+                <div
+                    class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
+                    <div
+                        class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                        <div
+                            class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
+                            <h3
+                                class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
+                                <span class="mr-3 font-semibold text-dark">Estudantes</span>
+                                <span class="mt-1 font-medium text-secondary-dark text-lg/normal">Lista com todos os
+                                    estudantes cadastrados no sistema.</span>
+                            </h3>
+                        </div>
+                        <div class="flex-auto block py-8 pt-6 px-9">
+                            <div class="overflow-x-auto">
+                                <table class="w-full my-0 align-middle text-dark border-neutral-200">
+                                    <thead class="align-bottom">
+                                        <tr class="font-semibold text-[0.95rem] text-secondary-dark">
+                                            <th class="pb-3 text-start min-w-[175px]">Nome</th>
+                                            <th class="pb-3 text-end min-w-[100px]">E-mail</th>
+                                            <th class="pb-3 text-end min-w-[100px]">N° de Disciplinas</th>
+                                            <th class="pb-3 text-end min-w-[50px]">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in students %}
+                                        <tr class="border-b border-dashed last:border-b-0">
+                                            <td class="p-3 pl-0">
+                                                <div class="flex items-center">
+                                                    <div class="flex flex-col justify-start">
+                                                        <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                        student.name }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                    student.email }}</span>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <span class="font-semibold text-light-inverse text-md/normal">{{
+                                                    student.subjects|length }}</span>
+                                            </td>
+                                            <td class="p-3 pr-0 text-end">
+                                                <form
+                                                    action="{{ url_for('teacher_blueprint.remove_student', student_id=student.id) }}"
+                                                    method="POST">
+                                                    <a href="{{ url_for('teacher_blueprint.edit_student', student_id=student.id) }}"
+                                                        class="m-1 rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Editar
+                                                    </a>
+                                                    <a href="#"
+                                                        class="m-1 rounded-md bg-orange-400 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">Ver
+                                                        Detalhes</a>
+                                                    <button type="submit" formmethod="POST"
+                                                        class="m-0 rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Excluir</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
