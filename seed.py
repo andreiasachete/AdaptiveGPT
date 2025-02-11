@@ -111,9 +111,9 @@ def mock_all_data():
                 print(f"Criando Student_{student_count}")
                 if student_count == 1:
                     student = Student(
-                        name="Aluno",
-                        email="aluno@aluno.com",
-                        password="aluno",
+                        name="Estudante",
+                        email="estudante@estudante.com",
+                        password="estudante",
                         organization_id=organization.id,
                     )
                 else:

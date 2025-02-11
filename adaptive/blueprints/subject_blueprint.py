@@ -26,6 +26,7 @@ def view_subject(subject_id: int):
 
     # Redirecting the user to the dashboard page if the subject does not exist
     if not subject:
+        flash("Disciplina não encontrada", "error")
         return redirect(url_for("teacher_blueprint.dashboard"))
 
     return render_template("view_subject.html", subject=subject)
@@ -59,6 +60,7 @@ def remove_subject(subject_id: int):
 
     # Removing the subject from the database
     Subject.delete(id=subject_id)
+    flash("Disciplina excluída com sucesso", "success")
     return redirect(url_for("teacher_blueprint.dashboard"))
 
 
@@ -74,7 +76,7 @@ def create_subject():
     # Creating a subject instance based on the form data
     name = request.form["subject_name"]
     subject = Subject(name=name, teacher_id=session["teacher_id"])
-
+    flash("Disciplina criada com sucesso", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
 
 
@@ -132,6 +134,7 @@ def create_subject_student(subject_id: int):
         if subject_student is None:
             subject_student = SubjectStudent(student_id=student.id, subject_id=subject.id)
 
+    flash("Lista de alunos(as) da disciplina atualizada com sucesso!", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
 
 
@@ -141,6 +144,7 @@ def remove_subject_student(subject_id: int, student_id: int):
     subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
     student = EntityManager.session.query(Student).filter_by(id=student_id).first()
     remove_student_from_subject(student=student, subject=subject)
+    flash("Aluno(a) removido(a) da disciplina com sucesso!", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
 
 

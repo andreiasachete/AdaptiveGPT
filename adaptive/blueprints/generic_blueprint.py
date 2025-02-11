@@ -29,7 +29,7 @@ def require_authentication(user_type=None):
 
             elif user_type == "student":
                 if "student_id" not in session:
-                    flash("Você precisa estar logado como aluno para acessar esta página.", "warning")
+                    flash("Você precisa estar logado como estudante para acessar esta página.", "warning")
                     return redirect(url_for("generic_blueprint.index"))
 
             else:
@@ -48,8 +48,10 @@ def redirect_if_logged_in(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if "teacher_id" in session:
+            flash("Você já está logado como professor, enquanto essa página só é acessível para usuários não autenticados.", "warning")
             return redirect(url_for("teacher_blueprint.dashboard"))
         elif "student_id" in session:
+            flash("Você já está logado como estudante, enquanto essa página só é acessível para usuários não autenticados.", "warning")
             return redirect(url_for("student_blueprint.dashboard"))
         return func(*args, **kwargs)
 
@@ -160,6 +162,7 @@ def my_account():
 
 
 @generic_blueprint.route("/my_account", methods=["POST"])
+@require_authentication()
 def update_account():
     # Finding the user account based on the session data
     if "teacher_id" in session:
@@ -184,12 +187,15 @@ def update_account():
 
 
 @generic_blueprint.route("/sign_out", methods=["GET"])
+@require_authentication()
 def sign_out():
     # Removing the teacher credential from the session
     if "teacher_id" in session:
         session.pop("teacher_id")
     elif "student_id" in session:
         session.pop("student_id")
+
+    flash("Você foi desconectado(a) com sucesso!", "success")
 
     return redirect(url_for("generic_blueprint.index"))
 

@@ -1,18 +1,18 @@
 {
-    "printWidth": 300,
+    "printWidth": 350,
     "tabWidth": 4,
     "useTabs": false,
     "singleQuote": false,
     "semi": true,
     "htmlWhitespaceSensitivity": "ignore",
-    "plugins": [
-        "prettier-plugin-django"
-    ],
+    "bracketSameLine": true,
     "overrides": [
         {
             "files": "*.html",
             "options": {
-                "parser": "django"
+                "parser": "html",
+                "proseWrap": "never",
+                "singleAttributePerLine": false
             }
         }
     ]

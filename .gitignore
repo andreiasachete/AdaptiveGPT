@@ -175,3 +175,6 @@ ec2_key.pem
 
 # Temporary OS files
 .DS_Store
+
+# Temporary JS files
+node_modules/

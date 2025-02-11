@@ -6,11 +6,10 @@ from adaptive.models.activity import Activity
 from adaptive.models.student_answer import StudentAnswer
 from adaptive.models.question import Question
 from adaptive.models.text_chunk import TextChunk
-from adaptive.models.student import Student
 
 # Importing native modules
 from os import SEEK_END, path, makedirs, getcwd
-from random import random, randint
+from random import random
 from time import time
 from re import sub, UNICODE, compile, DOTALL
 from unicodedata import normalize
@@ -22,7 +21,7 @@ from textwrap import dedent
 from adaptive.blueprints.generic_blueprint import require_authentication
 
 # Importing Flask packages and modules
-from flask import Blueprint, render_template, redirect, url_for, session, request, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from docling.document_converter import DocumentConverter
 from ftfy import fix_text
 from werkzeug.utils import secure_filename
@@ -279,6 +278,7 @@ def view_activity(subject_id: int, activity_id: int):
 
     # Redirecting the user to the dashboard page if the subject or the activity do not exist
     if not subject or not activity:
+        flash("A atividade informada na URL não existe.", "error")
         return redirect(url_for("teacher_blueprint.dashboard"))
 
     activity.number_of_fully_correct_answers = 0
@@ -415,6 +415,7 @@ def remove_activity(subject_id: int, activity_id: int):
     # Removing the activity from the database
     Activity.delete(id=activity_id)
 
+    flash("Atividade excluída com sucesso!", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject_id))
 
 
@@ -449,7 +450,7 @@ def create_activity(subject_id: int):
     file_length = base_material.tell()
     base_material.seek(0)
     if file_length > MAX_CONTENT_LENGTH:
-        flash("O arquivo excede o tamanho máximo de 5MB.", "error")
+        flash(f"O arquivo excede o tamanho máximo de {MAX_CONTENT_LENGTH / 1024 / 1024}MB.", "error")
         return redirect(request.url)
 
     # Building the PDF file name based on a combination of the current timestamp and the original file name
@@ -477,7 +478,7 @@ def create_activity(subject_id: int):
 
     # Creating the activity instance
     activity = Activity(
-        base_material=base_material.filename,
+        base_material=new_filename,
         min_questions=min_questions,
         max_questions=max_questions,
         model_name=model_name,
@@ -510,6 +511,7 @@ def create_activity(subject_id: int):
     for student in subject.students:
         generate_question(activity_id=activity.id, student_id=student.id)
 
+    flash("Atividade criada com sucesso!", "success")
     return redirect(url_for("activity_blueprint.view_activity", subject_id=subject.id, activity_id=activity.id))
 
 
@@ -529,7 +531,7 @@ def analyze_answer(question_id: int):
         =============================
         ==== AVALIE UMA RESPOSTA ====
         =============================
-        ---- Resposta do Aluno ----
+        ---- Resposta do Estudante ----
         {request.form['question_answer']}
 
         ---- Resposta Esperada ----
@@ -569,4 +571,5 @@ def analyze_answer(question_id: int):
     else:
         generate_question(activity_id=activity.id, student_id=trajectory.student_id)
 
+    flash("Resposta avaliada com sucesso!", "success")
     return redirect(url_for("student_blueprint.view_active_trajectories"))

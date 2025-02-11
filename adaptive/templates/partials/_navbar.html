@@ -2,30 +2,20 @@
     <div class="flex lg:flex-1">
         <a href="{{ url_for('teacher_blueprint.dashboard') }}" class="-m-1.5 p-1.5">
             <span class="sr-only">AdaptiveGPT</span>
-            <img class="h-12 w-auto" src="{{ url_for('static', filename='img/logo_without_letters.png') }}" alt="Logo AdaptiveGPT">
+            <img class="h-12 w-auto" src="{{ url_for('static', filename='img/logo_without_letters.png') }}" alt="Logo AdaptiveGPT" />
         </a>
     </div>
     <div class="lg:flex lg:gap-x-12">
         {% if 'teacher_id' in session %}
-        <a href="{{ url_for('teacher_blueprint.dashboard') }}"
-            class="text-sm/6 font-semibold text-gray-900">Início</a>
-        <a href="{{ url_for('teacher_blueprint.view_students') }}"
-            class="text-sm/6 font-semibold text-gray-900">Estudantes</a>
-        <a href="{{ url_for('generic_blueprint.my_account') }}"
-            class="text-sm/6 font-semibold text-gray-900">Minha
-            Conta</a>
-        <a href="{{ url_for('generic_blueprint.sign_out') }}"
-            class="text-sm/6 font-semibold text-gray-900">Sair</a>
+        <a href="{{ url_for('teacher_blueprint.dashboard') }}" class="text-sm/6 font-semibold text-gray-900">Início</a>
+        <a href="{{ url_for('teacher_blueprint.view_students') }}" class="text-sm/6 font-semibold text-gray-900">Estudantes</a>
+        <a href="{{ url_for('generic_blueprint.my_account') }}" class="text-sm/6 font-semibold text-gray-900">Minha Conta</a>
+        <a href="{{ url_for('generic_blueprint.sign_out') }}" class="text-sm/6 font-semibold text-gray-900">Sair</a>
         {% elif 'student_id' in session %}
-        <a href="{{ url_for('student_blueprint.dashboard') }}"
-            class="text-sm/6 font-semibold text-gray-900">Início</a>
-        <a href="{{ url_for('student_blueprint.view_active_trajectories') }}"
-            class="text-sm/6 font-semibold text-gray-900">Trajetórias Ativas</a>
-        <a href="{{ url_for('generic_blueprint.my_account') }}"
-            class="text-sm/6 font-semibold text-gray-900">Minha
-            Conta</a>
-        <a href="{{ url_for('generic_blueprint.sign_out') }}"
-            class="text-sm/6 font-semibold text-gray-900">Sair</a>
+        <a href="{{ url_for('student_blueprint.dashboard') }}" class="text-sm/6 font-semibold text-gray-900">Início</a>
+        <a href="{{ url_for('student_blueprint.view_active_trajectories') }}" class="text-sm/6 font-semibold text-gray-900">Trajetórias Ativas</a>
+        <a href="{{ url_for('generic_blueprint.my_account') }}" class="text-sm/6 font-semibold text-gray-900">Minha Conta</a>
+        <a href="{{ url_for('generic_blueprint.sign_out') }}" class="text-sm/6 font-semibold text-gray-900">Sair</a>
         {% endif %}
     </div>
 </nav>

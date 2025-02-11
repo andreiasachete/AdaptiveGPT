@@ -123,6 +123,7 @@ def edit_student(student_id: int):
 
     # Redirecting the user to the student page if the student does not exist
     if student is None:
+        flash("Estudante não encontrado!", "warning")
         return redirect(url_for("teacher_blueprint.view_students"))
 
     return render_template("edit_student.html", student=student)
@@ -154,6 +155,7 @@ def remove_student(student_id: int):
 
     # Removing the student from the database
     Student.delete(id=student.id)
+    flash("Estudante excluído com sucesso!", "success")
     return redirect(url_for("teacher_blueprint.view_students"))
 
 

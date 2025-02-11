@@ -1,53 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="h-full bg-white">
+    <head>
+        {% include "partials/_header.html" %}
+    </head>
 
-<head>
-    {% include "partials/_header.html" %}
-</head>
+    <body class="h-full">
+        <header class="bg-white">{% include "partials/_navbar.html" %} {% include "partials/_alerts.html" %}</header>
+        <br />
+        <br />
 
-<body class="h-full">
-    <header class="bg-white">
-        {% include "partials/_navbar.html" %}
-        {% include "partials/_alerts.html" %}
-    </header>
-    <br><br>
-
-    <div class="container mx-auto px-4">
-        <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Minhas Turmas</h2>
-        <br>
-        <a href="{{ url_for('subject_blueprint.new_subject') }}"
-            class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Cadastrar
-            Turma</a>
-        <br><br>
-        <hr>
-        <ul role="list" class="divide-y divide-gray-100">
-            {% for subject in subjects %}
-            <li class="flex justify-between gap-x-6 py-5">
-                <div class="flex min-w-0 gap-x-4">
-                    <span
-                        class="bg-cyan-700 text-white text-xl font-bold rounded-full w-12 h-12 flex items-center justify-center">
-                        {{ loop.index }}
-                    </span>
-                    <div class="min-w-0 flex-auto">
-                        <p class="text-sm/6 font-semibold text-gray-900">{{ subject.name }}</p>
-                        <p class="mt-1 truncate text-xs/5 text-gray-500">{{ subject.students|length }} alunos</p>
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Minhas Turmas</h2>
+            <br />
+            <a href="{{ url_for('subject_blueprint.new_subject') }}" class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Cadastrar Turma</a>
+            <br />
+            <br />
+            <hr />
+            <ul role="list" class="divide-y divide-gray-100">
+                {% for subject in subjects %}
+                <li class="flex justify-between gap-x-6 py-5">
+                    <div class="flex min-w-0 gap-x-4">
+                        <span class="bg-cyan-700 text-white text-xl font-bold rounded-full w-12 h-12 flex items-center justify-center">{{ loop.index }}</span>
+                        <div class="min-w-0 flex-auto">
+                            <p class="text-sm/6 font-semibold text-gray-900">{{ subject.name }}</p>
+                            <p class="mt-1 truncate text-xs/5 text-gray-500">{{ subject.students|length }} estudantes</p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex items-center justify-center gap-x-6">
-                    <a href="{{ url_for('subject_blueprint.view_subject', subject_id=subject.id) }}"
-                        class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Ver
-                        Detalhes <span aria-hidden="true">→</span></a>
+                    <div class="flex items-center justify-center gap-x-6">
+                        <a href="{{ url_for('subject_blueprint.view_subject', subject_id=subject.id) }}" class="rounded-md bg-cyan-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+                            Ver Detalhes
+                            <span aria-hidden="true">→</span>
+                        </a>
 
-                    <form action="{{ url_for('subject_blueprint.remove_subject', subject_id=subject.id) }}"
-                        method="POST">
-                        <button type="submit" formmethod="post"
-                            class="rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Excluir</button>
-                    </form>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-</body>
-
+                        <form action="{{ url_for('subject_blueprint.remove_subject', subject_id=subject.id) }}" method="POST">
+                            <button type="submit" formmethod="post" class="rounded-md bg-rose-300 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300">Excluir</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
 </html>
