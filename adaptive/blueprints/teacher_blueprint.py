@@ -50,7 +50,10 @@ def create_teacher():
 
     if organization.administrator is None:
         organization.administrator = teacher
-        EntityManager.session.commit()
+        try:
+            EntityManager.session.commit()
+        except Exception:
+            EntityManager.session.rollback()
 
     flash(f"Bem-vindo(a), {teacher.name}", "success")
     return redirect(url_for("teacher_blueprint.dashboard"))

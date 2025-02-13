@@ -19,11 +19,15 @@ class EntityManager:
         if VERBOSE:
             print(f"Instância {self} criada com sucesso.")
 
-        # Adding the instance to the database
-        EntityManager.session.add(self)
+        try:
+            # Adding the instance to the database
+            EntityManager.session.add(self)
 
-        # Confirming the transaction
-        EntityManager.session.commit()
+            # Confirming the transaction
+            EntityManager.session.commit()
+
+        except Exception:
+            EntityManager.session.rollback()
 
     def __str__(self) -> str:
         """Defines how the object is represented inside print statements.

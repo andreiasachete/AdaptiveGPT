@@ -10,7 +10,7 @@ from adaptive.blueprints.activity_blueprint import activity_blueprint
 from flask import Flask
 
 # Importing the SQLAlchemy ORM
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 
 # Importing libraries to load the environment variables
@@ -35,8 +35,8 @@ def create_app():
     EntityManager.engine = create_engine("mysql+pymysql://root:root@localhost/adaptive")
     EntityManager.base.metadata.create_all(EntityManager.engine)
     EntityManager.session_maker = sessionmaker(bind=EntityManager.engine)
-    EntityManager.session = EntityManager.session_maker()
-    # EntityManager.session = scoped_session(EntityManager.session_maker)
+    # EntityManager.session = EntityManager.session_maker()
+    EntityManager.session = scoped_session(EntityManager.session_maker)
 
     # Registering Blueprints
     app.register_blueprint(generic_blueprint)
