@@ -70,18 +70,27 @@ class EntityManager:
 
         # If the instance exists, update its attributes
         if instance:
-            for attribute_name, attribute_value in new_attributes.items():
-                if hasattr(instance, attribute_name):
-                    setattr(instance, attribute_name, attribute_value)
+            try:
+                for attribute_name, attribute_value in new_attributes.items():
+                    if hasattr(instance, attribute_name):
+                        setattr(instance, attribute_name, attribute_value)
 
-            # Confirming the transaction
-            EntityManager.session.commit()
+                # Confirming the transaction
+                EntityManager.session.commit()
 
-            # Printing the success message
-            print(f"{instance.__class__.__name__}{instance.id} atualizada com sucesso.")
+                # Printing the success message
+                print(f"{instance.__class__.__name__}{instance.id} atualizada com sucesso.")
+
+            except Exception:
+                # Rolling back the transaction
+                EntityManager.session.rollback()
+
+                # Printing the error message
+                print(f"Erro ao atualizar {instance.__class__.__name__}_{instance.id}.")
 
             # Returning the updated instance
             return instance
+
         else:
             # Printing the error message
             print(f"{instance.__class__.__name__}{instance.id} não encontrada.")
@@ -103,17 +112,27 @@ class EntityManager:
         instance = EntityManager.session.query(cls).filter(cls.id == id).first()
 
         if instance:
-            # Removing the instance from the database
-            EntityManager.session.delete(instance)
+            try:
+                # Removing the instance from the database
+                EntityManager.session.delete(instance)
 
-            # Confirming the transaction
-            EntityManager.session.commit()
+                # Confirming the transaction
+                EntityManager.session.commit()
 
-            if VERBOSE:
-                print(f"{instance.__class__.__name__}_{id} deletada com sucesso.")
+                if VERBOSE:
+                    print(f"{instance.__class__.__name__}_{id} deletada com sucesso.")
 
-            # Returning True as the instance was successfully removed
-            return True
+                # Returning True as the instance was successfully removed
+                return True
+            except Exception:
+                # Rolling back the transaction
+                EntityManager.session.rollback()
+
+                if VERBOSE:
+                    print(f"Erro ao deletar {instance.__class__name__}_{id}.")
+
+                # Returning False as the instance was not removed
+                return False
         else:
             if VERBOSE:
                 print(f"Instância com ID {id} não encontrada.")
