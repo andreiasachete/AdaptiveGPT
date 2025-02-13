@@ -22,7 +22,7 @@ def create_app():
     app = Flask(__name__, static_folder="assets", static_url_path="/assets")
     app.secret_key = "super secret key"
 
-    # Getting the Groq API key (https://groq.com/) from an environment variable
+    # Getting the environment variables
     load_dotenv(dotenv_path=".env")
     environ.setdefault("GROQ_API_KEY", getenv("GROQ_API_KEY"))
     app.groq_api_key = getenv("GROQ_API_KEY")
