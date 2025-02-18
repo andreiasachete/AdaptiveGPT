@@ -171,10 +171,10 @@ def parse_answer_correctness_sentiment_humor_and_feedback(text):
 
 def generate_question(activity_id: int, student_id: int):
     # Gathering the information about the subject, the activity, and the student
-    activity = EntityManager.session.query(Activity).filter_by(id=activity_id).first()
+    activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
 
     # Checking if the student already has a trajectory for the activity and creating one if it does not
-    trajectory = EntityManager.session.query(Trajectory).filter_by(activity_id=activity_id, student_id=student_id).first()
+    trajectory = EntityManager.session().query(Trajectory).filter_by(activity_id=activity_id, student_id=student_id).first()
     if not trajectory:
         trajectory = Trajectory(activity_id=activity_id, student_id=student_id)
 
@@ -224,7 +224,7 @@ def generate_question(activity_id: int, student_id: int):
     ]
 
     # Selecting the first text chunk of the sorted list to generate a question
-    text_chunk = EntityManager.session.query(TextChunk).filter_by(identifier=sorted_text_chunks[0]).first()
+    text_chunk = EntityManager.session().query(TextChunk).filter_by(identifier=sorted_text_chunks[0]).first()
 
     # Generating a question based on the selected text chunk using a Large Language Model. First, we define the system and user prompts.
     # The system prompt comprises pre-defined instructions for the model, while the user prompt is the input from the user.
@@ -271,10 +271,10 @@ def generate_question(activity_id: int, student_id: int):
 @require_authentication(user_type="teacher")
 def view_activity(subject_id: int, activity_id: int):
     # Gathering the subject information
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
 
     # Gathering the activity information
-    activity = EntityManager.session.query(Activity).filter_by(id=activity_id).first()
+    activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
 
     # Redirecting the user to the dashboard page if the subject or the activity do not exist
     if not subject or not activity:
@@ -396,33 +396,18 @@ def view_activity(subject_id: int, activity_id: int):
 @activity_blueprint.route("/subjects/<int:subject_id>/activities/<int:activity_id>/remove", methods=["POST"])
 @require_authentication(user_type="teacher")
 def remove_activity(subject_id: int, activity_id: int):
-    # Gathering the activity information
-    activity = EntityManager.session.query(Activity).filter_by(id=activity_id).first()
-
-    # Removing the entities that are related to the activity
-    for student_answer in activity.student_answers:  # StudentAnswer
-        StudentAnswer.delete(id=student_answer.id)
-
-    for question in activity.questions:  # Question
-        Question.delete(id=question.id)
-
-    for trajectory in activity.trajectories:  # Trajectory
-        Trajectory.delete(id=trajectory.id)
-
-    for text_chunk in activity.text_chunks:  # FileChunk
-        TextChunk.delete(id=text_chunk.id)
-
     # Removing the activity from the database
     Activity.delete(id=activity_id)
 
     flash("Atividade excluída com sucesso!", "success")
+
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject_id))
 
 
 @activity_blueprint.route("/subjects/<int:subject_id>/activities/new", methods=["GET"])
 @require_authentication(user_type="teacher")
 def new_activity(subject_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
     return render_template("new_activity.html", subject=subject)
 
 
@@ -430,7 +415,7 @@ def new_activity(subject_id: int):
 @require_authentication(user_type="teacher")
 def create_activity(subject_id: int):
     # Gathering the subject information
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
 
     # Creating an activity instance based on the form data
     base_material = request.files["activity_base_material"]
@@ -519,7 +504,7 @@ def create_activity(subject_id: int):
 @require_authentication()
 def analyze_answer(question_id: int):
     # Gathering the information about the subject, the activity, and the student
-    question = EntityManager.session.query(Question).filter_by(id=question_id).first()
+    question = EntityManager.session().query(Question).filter_by(id=question_id).first()
     trajectory = question.trajectory
     activity = question.trajectory.activity
 

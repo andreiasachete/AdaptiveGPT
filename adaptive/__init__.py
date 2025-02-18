@@ -35,7 +35,6 @@ def create_app():
     EntityManager.engine = create_engine("mysql+pymysql://root:root@localhost/adaptive")
     EntityManager.base.metadata.create_all(EntityManager.engine)
     EntityManager.session_maker = sessionmaker(bind=EntityManager.engine)
-    # EntityManager.session = EntityManager.session_maker()
     EntityManager.session = scoped_session(EntityManager.session_maker)
 
     # Registering Blueprints
@@ -50,3 +49,8 @@ def create_app():
 
 # Exporting the app instance
 app = create_app()
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    EntityManager.session.remove()

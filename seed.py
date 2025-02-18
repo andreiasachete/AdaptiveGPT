@@ -40,28 +40,32 @@ def mock_all_data():
         subject.delete(id=subject.id)
     for teacher in Teacher.all():
         teacher.delete(id=teacher.id)
-    for organization in Organization.all():
-        organization.delete(id=organization.id)
+    for org in Organization.all():
+        org.delete(id=org.id)
 
     # Creating instances of the Organization class
     for x in range(1):
         print(f"Criando Organização_{x}")
-        organization = Organization(name=faker_instance.word())
+        org = Organization(name=faker_instance.word())
 
         # Creating instances of the Teacher class
         for i in range(2):
             print(f"Criando Professor_{i}")
             if i == 0:
-                teacher = Teacher(name="Professor", email="professor@professor.com", password="professor", organization_id=organization.id)
-                organization.administrator = teacher
-                EntityManager.session.commit()
+                teacher = Teacher(
+                    name="Professor",
+                    email="professor@professor.com",
+                    password="professor",
+                    organization_id=org.id,
+                )
+                Organization.update(id=org.id, new_attributes={"administrator": teacher})
 
             else:
                 Teacher(
                     name=faker_instance.name(),
                     email=faker_instance.email(),
                     password=faker_instance.password(),
-                    organization_id=organization.id,
+                    organization_id=org.id,
                 ),
 
         # Creating instances of the Subject class
@@ -114,14 +118,14 @@ def mock_all_data():
                         name="Estudante",
                         email="estudante@estudante.com",
                         password="estudante",
-                        organization_id=organization.id,
+                        organization_id=org.id,
                     )
                 else:
                     student = Student(
                         name=faker_instance.name(),
                         email=faker_instance.email(),
                         password=faker_instance.password(),
-                        organization_id=organization.id,
+                        organization_id=org.id,
                     )
 
                 SubjectStudent(

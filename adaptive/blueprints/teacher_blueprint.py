@@ -18,6 +18,7 @@ from adaptive.blueprints.generic_blueprint import require_authentication, redire
 # Importing Flask packages and modules
 from flask import Blueprint, render_template, redirect, url_for, session, request, flash, current_app
 
+
 teacher_blueprint = Blueprint("teacher_blueprint", __name__, url_prefix="/")
 
 
@@ -25,7 +26,7 @@ teacher_blueprint = Blueprint("teacher_blueprint", __name__, url_prefix="/")
 @require_authentication(user_type="teacher")
 def dashboard():
     # Gathering all subjects that belong to the teacher in the session
-    subjects = EntityManager.session.query(Subject).filter(Subject.teacher_id == session["teacher_id"]).all()
+    subjects = EntityManager.session().query(Subject).filter(Subject.teacher_id == session["teacher_id"]).all()
 
     return render_template("teacher_dashboard.html", subjects=subjects)
 
@@ -33,7 +34,7 @@ def dashboard():
 @teacher_blueprint.route("/sign_up", methods=["GET"])
 @redirect_if_logged_in
 def sign_up():
-    organizations = EntityManager.session.query(Organization).all()
+    organizations = EntityManager.session().query(Organization).all()
     return render_template("sign_up.html", organizations=organizations)
 
 
@@ -44,16 +45,15 @@ def create_teacher():
     name = request.form["teacher_name"]
     email = request.form["teacher_email"]
     password = request.form["teacher_password"]
-    organization = EntityManager.session.query(Organization).filter_by(id=request.form["teacher_organization"]).first()
+    organization = EntityManager.session().query(Organization).filter_by(id=request.form["teacher_organization"]).first()
     teacher = Teacher(name=name, email=email, password=password, organization_id=organization.id)
     session["teacher_id"] = teacher.id
 
     if organization.administrator is None:
-        organization.administrator = teacher
-        try:
-            EntityManager.session.commit()
-        except Exception:
-            EntityManager.session.rollback()
+        Organization.update(
+            id=organization.id,
+            new_attributes={"administrator": teacher},
+        )
 
     flash(f"Bem-vindo(a), {teacher.name}", "success")
     return redirect(url_for("teacher_blueprint.dashboard"))
@@ -74,8 +74,8 @@ def create_organization():
 @require_authentication(user_type="teacher")
 def view_students():
     # Gathering all students that belong to the teacher's organization
-    teacher = EntityManager.session.query(Teacher).get(session["teacher_id"])
-    students = EntityManager.session.query(Student).filter(Student.organization_id == teacher.organization_id).all()
+    teacher = Teacher.find_by_id(id=session["teacher_id"])
+    students = EntityManager.session().query(Student).filter(Student.organization_id == teacher.organization_id).all()
 
     return render_template("view_students.html", students=students)
 
@@ -93,7 +93,7 @@ def create_student():
     name = request.form["student_name"]
     email = request.form["student_email"]
     password = request.form["student_password"]
-    organization_id = EntityManager.session.query(Teacher).get(session["teacher_id"]).organization_id
+    organization_id = EntityManager.session().query(Teacher).get(session["teacher_id"]).organization_id
     Student(name=name, email=email, password=password, organization_id=organization_id)
 
     # Parsing the email body template
@@ -122,7 +122,7 @@ def create_student():
 @require_authentication(user_type="teacher")
 def edit_student(student_id: int):
     # Gathering the student information
-    student = EntityManager.session.query(Student).filter_by(id=student_id).first()
+    student = EntityManager.session().query(Student).filter_by(id=student_id).first()
 
     # Redirecting the user to the student page if the student does not exist
     if student is None:
@@ -135,30 +135,12 @@ def edit_student(student_id: int):
 @teacher_blueprint.route("/students/<int:student_id>", methods=["POST"])
 @require_authentication(user_type="teacher")
 def remove_student(student_id: int):
-    # Removing the entities that are related to the student
-    student = EntityManager.session.query(Student).filter_by(id=student_id).first()
-
-    # StudentAnswer
-    for trajectory in student.trajectories:
-        for question in trajectory.questions:
-            StudentAnswer.delete(id=question.student_answer.id)
-
-    # Question
-    for trajectory in student.trajectories:
-        for question in trajectory.questions:
-            Question.delete(id=question.id)
-
-    # Trajectory
-    for trajectory in student.trajectories:
-        Trajectory.delete(id=trajectory.id)
-
-    # SubjectStudent
-    for subject_student in student.subjects_students:
-        SubjectStudent.delete(id=subject_student.id)
-
     # Removing the student from the database
+    student = Student.find_by_id(id=student_id)
     Student.delete(id=student.id)
+
     flash("Estudante excluído com sucesso!", "success")
+
     return redirect(url_for("teacher_blueprint.view_students"))
 
 
@@ -166,7 +148,7 @@ def remove_student(student_id: int):
 @require_authentication(user_type="teacher")
 def update_student(student_id: int):
     # Updating the student account information based on the form data (student_name, student_email, student_password)
-    student = EntityManager.session.query(Student).get(student_id)
+    student = EntityManager.session().query(Student).get(student_id)
     new_attributes = {
         "name": request.form["student_name"],
         "email": request.form["student_email"],

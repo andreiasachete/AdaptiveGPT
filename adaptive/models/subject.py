@@ -74,5 +74,3 @@ class Subject(EntityManager.base, EntityManager):
                 trajectories.append(trajectory)
 
         return trajectories
-
-    # SubjectStudent

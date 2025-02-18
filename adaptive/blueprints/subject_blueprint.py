@@ -22,7 +22,7 @@ subject_blueprint = Blueprint("subject_blueprint", __name__, url_prefix="/")
 @require_authentication(user_type="teacher")
 def view_subject(subject_id: int):
     # Gathering the subject information
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
 
     # Redirecting the user to the dashboard page if the subject does not exist
     if not subject:
@@ -35,32 +35,11 @@ def view_subject(subject_id: int):
 @subject_blueprint.route("/subjects/<int:subject_id>", methods=["POST"])
 @require_authentication(user_type="teacher")
 def remove_subject(subject_id: int):
-    # Removing the entities that are related to the subject
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
-
-    # StudentAnswer
-    for student_answer in subject.student_answers:
-        StudentAnswer.delete(id=student_answer.id)
-
-    # Question
-    for question in subject.questions:
-        Question.delete(id=question.id)
-
-    # Trajectory
-    for trajectory in subject.trajectories:
-        Trajectory.delete(id=trajectory.id)
-
-    # Activity
-    for activity in subject.activities:
-        Activity.delete(id=activity.id)
-
-    # SubjectStudent
-    for subject_student in subject.subjects_students:
-        SubjectStudent.delete(id=subject_student.id)
-
     # Removing the subject from the database
     Subject.delete(id=subject_id)
+
     flash("Disciplina excluída com sucesso", "success")
+
     return redirect(url_for("teacher_blueprint.dashboard"))
 
 
@@ -83,16 +62,16 @@ def create_subject():
 @subject_blueprint.route("/subjects/<int:subject_id>/students/register", methods=["GET"])
 @require_authentication(user_type="teacher")
 def new_subject_student(subject_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
-    teacher = EntityManager.session.query(Teacher).get(session["teacher_id"])
-    students = EntityManager.session.query(Student).filter(Student.organization_id == teacher.organization_id).all()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
+    teacher = EntityManager.session().query(Teacher).get(session["teacher_id"])
+    students = EntityManager.session().query(Student).filter(Student.organization_id == teacher.organization_id).all()
 
     return render_template("register_students_to_subject.html", subject=subject, students=students)
 
 
 def remove_student_from_subject(student: object, subject: object):
-    subject_activities_ids = [activity.id for activity in EntityManager.session.query(Activity).filter_by(subject_id=subject.id).all()]
-    subject_student = EntityManager.session.query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
+    subject_activities_ids = [activity.id for activity in EntityManager.session().query(Activity).filter_by(subject_id=subject.id).all()]
+    subject_student = EntityManager.session().query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
 
     if subject_student is not None:
         for trajectory in student.trajectories:
@@ -107,14 +86,14 @@ def remove_student_from_subject(student: object, subject: object):
 @subject_blueprint.route("/subjects/<int:subject_id>/students/register", methods=["POST"])
 @require_authentication(user_type="teacher")
 def create_subject_student(subject_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
 
     # Gathering the IDs of the students that are supposed to be registered to the subject from the form data
     students_ids_to_register = [int(student_id) for student_id in request.form.getlist("students_to_register")]
 
     # Building lists of students that are supposed to be registered and not supposed to be registered to the subject
-    teacher = EntityManager.session.query(Teacher).get(session["teacher_id"])
-    all_students = EntityManager.session.query(Student).filter(Student.organization_id == teacher.organization_id).all()
+    teacher = EntityManager.session().query(Teacher).get(session["teacher_id"])
+    all_students = EntityManager.session().query(Student).filter(Student.organization_id == teacher.organization_id).all()
     students_to_register = []
     students_not_to_register = []
 
@@ -130,7 +109,7 @@ def create_subject_student(subject_id: int):
 
     # Registering the students that are supposed to attend the subject
     for student in students_to_register:
-        subject_student = EntityManager.session.query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
+        subject_student = EntityManager.session().query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
         if subject_student is None:
             subject_student = SubjectStudent(student_id=student.id, subject_id=subject.id)
 
@@ -141,8 +120,8 @@ def create_subject_student(subject_id: int):
 @subject_blueprint.route("/subjects/<int:subject_id>/students/<int:student_id>/unregister", methods=["POST"])
 @require_authentication(user_type="teacher")
 def remove_subject_student(subject_id: int, student_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
-    student = EntityManager.session.query(Student).filter_by(id=student_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
+    student = EntityManager.session().query(Student).filter_by(id=student_id).first()
     remove_student_from_subject(student=student, subject=subject)
     flash("Aluno(a) removido(a) da disciplina com sucesso!", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
@@ -151,17 +130,17 @@ def remove_subject_student(subject_id: int, student_id: int):
 @subject_blueprint.route("/subjects/<int:subject_id>/activities/new", methods=["GET"])
 @require_authentication(user_type="teacher")
 def new_activity(subject_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
     return render_template("new_activity.html", subject=subject)
 
 
 @subject_blueprint.route("/subjects/<int:subject_id>/students/<int:student_id>", methods=["GET"])
 @require_authentication(user_type="teacher")
 def view_student_progress(subject_id: int, student_id: int):
-    subject = EntityManager.session.query(Subject).filter_by(id=subject_id).first()
-    student = EntityManager.session.query(Student).filter_by(id=student_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
+    student = EntityManager.session().query(Student).filter_by(id=student_id).first()
 
-    subject_activities_ids = [activity.id for activity in EntityManager.session.query(Activity).filter_by(subject_id=subject.id).all()]
+    subject_activities_ids = [activity.id for activity in EntityManager.session().query(Activity).filter_by(subject_id=subject.id).all()]
 
     student.number_of_fully_correct_answers = 0
     student.number_of_partially_correct_answers = 0

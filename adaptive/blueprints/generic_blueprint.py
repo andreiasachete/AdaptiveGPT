@@ -127,10 +127,10 @@ def authenticate():
     password = request.form["password"]
 
     # Trying to find the teacher in the database
-    teacher = EntityManager.session.query(Teacher).filter_by(email=email).first()
+    teacher = EntityManager.session().query(Teacher).filter_by(email=email).first()
 
     # Trying to find the student in the database
-    student = EntityManager.session.query(Student).filter_by(email=email).first()
+    student = EntityManager.session().query(Student).filter_by(email=email).first()
 
     # Checking if the teacher exists and the password is correct
     if teacher is not None and teacher.password == password:
@@ -154,9 +154,9 @@ def authenticate():
 def my_account():
     # Finding the user account based on the session data
     if "teacher_id" in session:
-        user = EntityManager.session.query(Teacher).get(session["teacher_id"])
+        user = EntityManager.session().query(Teacher).get(session["teacher_id"])
     elif "student_id" in session:
-        user = EntityManager.session.query(Student).get(session["student_id"])
+        user = EntityManager.session().query(Student).get(session["student_id"])
 
     return render_template("my_account.html", user=user)
 
@@ -166,9 +166,9 @@ def my_account():
 def update_account():
     # Finding the user account based on the session data
     if "teacher_id" in session:
-        user = EntityManager.session.query(Teacher).get(session["teacher_id"])
+        user = EntityManager.session().query(Teacher).get(session["teacher_id"])
     elif "student_id" in session:
-        user = EntityManager.session.query(Student).get(session["student_id"])
+        user = EntityManager.session().query(Student).get(session["student_id"])
 
     # Updating the user account information based on the form data (name, email, password)
     new_attributes = {
@@ -207,11 +207,11 @@ def reset_password_request():
     email = request.form["email"]
 
     # Trying to find the teacher in the database
-    user = EntityManager.session.query(Teacher).filter_by(email=email).first()
+    user = EntityManager.session().query(Teacher).filter_by(email=email).first()
 
     if user is None:
         # Trying to find the student in the database
-        user = EntityManager.session.query(Student).filter_by(email=email).first()
+        user = EntityManager.session().query(Student).filter_by(email=email).first()
 
     # Redirecting the user to the sign in page if the credentials are invalid
     if user is None:
@@ -274,7 +274,7 @@ def apply_password_reset(user_type: str):
 
     # Updating the user password
     user_class = globals()[user_type.capitalize()]
-    user = EntityManager.session.query(user_class).filter_by(email=email).first()
+    user = EntityManager.session().query(user_class).filter_by(email=email).first()
     if user:
         new_attributes = {"password": new_password}
         user_class.update(id=user.id, new_attributes=new_attributes)

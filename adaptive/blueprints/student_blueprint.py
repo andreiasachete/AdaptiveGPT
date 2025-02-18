@@ -6,7 +6,7 @@ from adaptive.models.student import Student
 from adaptive.blueprints.generic_blueprint import require_authentication
 
 # Importing Flask packages and modules
-from flask import Blueprint, render_template, redirect, url_for, session, request, flash
+from flask import Blueprint, render_template, session
 
 student_blueprint = Blueprint("student_blueprint", __name__, url_prefix="/")
 
@@ -15,7 +15,7 @@ student_blueprint = Blueprint("student_blueprint", __name__, url_prefix="/")
 @require_authentication(user_type="student")
 def dashboard():
     # Gathering the student logged in
-    student = EntityManager.session.query(Student).filter_by(id=session["student_id"]).first()
+    student = EntityManager.session().query(Student).filter_by(id=session["student_id"]).first()
 
     student.number_of_fully_correct_answers = 0
     student.number_of_partially_correct_answers = 0
@@ -98,7 +98,7 @@ def dashboard():
 @require_authentication(user_type="student")
 def view_active_trajectories():
     # Gathering the student logged in
-    student = EntityManager.session.query(Student).filter_by(id=session["student_id"]).first()
+    student = EntityManager.session().query(Student).filter_by(id=session["student_id"]).first()
 
     active_trajectories = []
     for trajectory in student.trajectories:
