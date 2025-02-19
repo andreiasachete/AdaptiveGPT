@@ -302,6 +302,8 @@ def view_activity(subject_id: int, activity_id: int):
         questions.extend(trajectory.questions)
 
         for index, question in enumerate(trajectory.questions):
+            question.difficulty_name = "Fácil" if question.difficulty == 1 else "Médio" if question.difficulty == 2 else "Difícil"
+
             if question.student_answer is not None:
                 # Processing information to be displayed in the trajectory list
                 if index == 0:
@@ -333,9 +335,7 @@ def view_activity(subject_id: int, activity_id: int):
                     question.difficulty_image = "img/difficulty3.png"
 
                 # Processing information to be displayed in the activity graphs
-                question.difficulty_name = "Fácil" if question.difficulty == 1 else "Médio" if question.difficulty == 2 else "Difícil"
                 trajectory.questions_answered += 1
-
                 if question.student_answer.correctness == 1:
                     trajectory.fully_correct_answers += 1
                     activity.number_of_fully_correct_answers += 1
