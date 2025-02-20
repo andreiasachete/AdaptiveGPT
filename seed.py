@@ -79,13 +79,20 @@ def mock_all_data():
             # Creating an instance of the Activity class and linking it to its subject
             text_chunk_file_name = f"{str(time()).replace('.', '')}_text_chunks.json"
             text_chunks_file_path = path.join(UPLOAD_DIRECTORY, text_chunk_file_name)
+
+            provider_model_options = [
+                {"llm_provider": "gemini", "model_name": "gemini-2.0-flash"},
+                {"llm_provider": "groq", "model_name": "llama3-70b-8192"},
+            ]
+
             activity = Activity(
                 subject_id=subject.id,
                 base_material="pdf_exemplo.pdf",
                 text_chunks_file_path=text_chunks_file_path,
                 min_questions=randint(1, 3),
                 max_questions=randint(7, 10),
-                model_name=choice(["llama3-8b-8192", "llama3-8b-4096", "llama3-4b-2048"]),
+                llm_provider=choice(provider_model_options)["llm_provider"],
+                model_name=choice(provider_model_options)["model_name"],
                 model_temperature=random(),
                 model_system_prompt=faker_instance.sentence(),
             )
