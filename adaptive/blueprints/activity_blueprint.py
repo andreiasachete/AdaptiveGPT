@@ -9,6 +9,7 @@ from adaptive.models.text_chunk import TextChunk
 
 # Importing native modules
 from os import SEEK_END, path, makedirs, getcwd
+from time import sleep
 from random import random
 from time import time
 from re import sub, UNICODE, compile, DOTALL
@@ -78,7 +79,7 @@ ACCENT_REPLACEMENTS = {
 
 # Defining constants for LLM interaction
 MAX_TOKENS = 800  # The maximum number of tokens per text chunk
-LLM_PROVIDER = "gemini"  # The Large Language Model provider (options: "groq", "gemini")
+LLM_PROVIDER = "groq"  # The Large Language Model provider (options: "groq", "gemini")
 
 
 def fix_accents(text: str) -> str:
@@ -110,7 +111,9 @@ def split_text(text: str, max_length: int) -> str:
         yield " ".join(words[i : i + max_length]).strip()
 
 
-def ask_question_to_model(llm_provider: str, llm_caller: object, llm: str, system_prompt: str, user_prompt: str, show_response_metadata: bool = False) -> dict:
+def ask_question_to_model(
+    llm_provider: str, llm_caller: object, llm: str, system_prompt: str, user_prompt: str, temperature: float, show_response_metadata: bool = False
+) -> dict:
     if llm_provider == "groq":
         # Defining the data structure that carries the system and user prompts.
         # The system prompt comprises pre-defined instructions for
@@ -131,7 +134,10 @@ def ask_question_to_model(llm_provider: str, llm_caller: object, llm: str, syste
     elif llm_provider == "gemini":
         response = llm_caller.models.generate_content(
             model=llm,
-            config=types.GenerateContentConfig(system_instruction=system_prompt),
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                temperature=temperature,
+            ),
             contents=[user_prompt],
         ).text
         return response
@@ -193,10 +199,11 @@ def generate_question(activity_id: int, student_id: int):
 
     # Checking if the student already has a trajectory for the activity and creating one if it does not
     trajectory = EntityManager.session().query(Trajectory).filter_by(activity_id=activity_id, student_id=student_id).first()
-    if not trajectory:
+
+    if not isinstance(trajectory, Trajectory):
         trajectory = Trajectory(activity_id=activity_id, student_id=student_id)
 
-    if trajectory.status == "completed":
+    if isinstance(trajectory, Trajectory) and trajectory.status == "completed":
         return
 
     # Defining the difficulty level of the question based on the student's trajectory. There are three levels of difficulty:
@@ -215,12 +222,13 @@ def generate_question(activity_id: int, student_id: int):
         difficulty = 1
     else:
         last_answered_question = trajectory.last_answered_question
-        difficulty = int(last_answered_question.difficulty)
-        if last_answered_question.student_answer.correctness == 1:
-            difficulty = max(1, difficulty - 1)
-            difficulty_increased = False
-        elif last_answered_question.student_answer.correctness == 3:
-            difficulty = min(3, difficulty + 1)
+        if last_answered_question is not None:
+            difficulty = int(last_answered_question.difficulty)
+            if last_answered_question.student_answer.correctness == 1:
+                difficulty = max(1, difficulty - 1)
+                difficulty_increased = False
+            elif last_answered_question.student_answer.correctness == 3:
+                difficulty = min(3, difficulty + 1)
 
     # Selecting one of the text chunks of the activity to generate a question. To provide a better experience for the student,
     # we sort the text chunks in such a way that chunks less frequently used in previous questions within the trajectory are
@@ -280,6 +288,7 @@ def generate_question(activity_id: int, student_id: int):
             llm=activity.model_name,
             system_prompt=activity.model_system_prompt,
             user_prompt=user_prompt,
+            temperature=activity.model_temperature,
         )
         parsed_response = parse_question_body_and_answer(text=response)
 
@@ -291,6 +300,8 @@ def generate_question(activity_id: int, student_id: int):
         text_chunk_id=text_chunk.id,
         trajectory_id=trajectory.id,
     )
+
+    Trajectory.update(id=trajectory.id, new_attributes={"status": "active"})
 
 
 def generate_question_wrapper(activity_id, student_id):
@@ -350,6 +361,83 @@ def process_pdf_and_create_questions(activity_id: object, file_path: str):
         # Marking the activity as completed after generating the questions for all students
         activity.creation_status = "completed"
         Activity.update(id=activity.id, new_attributes={"creation_status": "completed"})
+
+
+def process_student_answer_and_advance_trajectory_wrapper(question_id: int):
+    from adaptive import app
+
+    with app.app_context():
+        process_student_answer_and_advance_trajectory(question_id=question_id)
+
+
+def process_student_answer_and_advance_trajectory(question_id: int):
+    # Gathering the information about the subject, the activity, and the student
+    question = EntityManager.session().query(Question).filter_by(id=question_id).first()
+    trajectory = question.trajectory
+    activity = question.trajectory.activity
+    student_answer = question.student_answer
+
+    # Generating a question based on the selected text chunk using a Large Language Model. First, we define the system and user prompts.
+    # The system prompt comprises pre-defined instructions for the model, while the user prompt is the input from the user.
+    # We format the user prompt as an unindented multi-line string using dedent.
+    user_prompt = dedent(
+        f"""
+        =============================
+        ==== AVALIE UMA RESPOSTA ====
+        =============================
+        ---- Resposta do Estudante ----
+        {student_answer.content}
+
+        ---- Resposta Esperada ----
+        {question.answer}
+        """
+    )
+
+    # Defining the foundational model for the application
+    if activity.llm_provider == "groq":
+        llm_caller = ChatGroq(
+            model=activity.model_name,
+            temperature=round(float(activity.model_temperature), 2),
+        )
+    elif activity.llm_provider == "gemini":
+        llm_caller = genai.Client(api_key=current_app.gemini_api_key)
+
+    # Calling the function that messages the LLM
+    parsed_response = {"correctness": "", "sentiment": "", "humor": "", "feedback": ""}
+    while parsed_response["correctness"] == "" or parsed_response["sentiment"] == "" or parsed_response["humor"] == "":
+        response = ask_question_to_model(
+            llm_provider=activity.llm_provider,
+            llm_caller=llm_caller,
+            llm=activity.model_name,
+            system_prompt=activity.model_system_prompt,
+            user_prompt=user_prompt,
+            temperature=activity.model_temperature,
+        )
+        parsed_response = parse_answer_correctness_sentiment_humor_and_feedback(text=response)
+        print(f"\n\nParsed Model Response:\n{parsed_response}\n\n")
+
+    StudentAnswer.update(
+        id=student_answer.id,
+        new_attributes={
+            "correctness": parsed_response["correctness"],
+            "sentiment": parsed_response["sentiment"],
+            "humor": parsed_response["humor"],
+            "descriptive_feedback": parsed_response["feedback"],
+        },
+    )
+
+    # Marking the trajectory as completed if the question difficulty is the maximum and the student's correctness level is the maximum and
+    # the minimum number of questions was answered. Otherwise, generating a new question for the student within the trajectory based
+    # on the student's performance
+    if (
+        question.difficulty == 3
+        and parsed_response["correctness"] == 3
+        and len(trajectory.questions) >= activity.min_questions
+        or len(trajectory.questions) >= activity.max_questions
+    ):
+        Trajectory.update(id=trajectory.id, new_attributes={"status": "completed"})
+    else:
+        generate_question_wrapper(activity_id=activity.id, student_id=trajectory.student_id)
 
 
 @activity_blueprint.route("/subjects/<int:subject_id>/activities/<int:activity_id>", methods=["GET"])
@@ -421,10 +509,10 @@ def view_activity(subject_id: int, activity_id: int):
 
                 # Processing information to be displayed in the activity graphs
                 trajectory.questions_answered += 1
-                if question.student_answer.correctness == 1:
+                if question.student_answer.correctness == 3:
                     trajectory.fully_correct_answers += 1
                     activity.number_of_fully_correct_answers += 1
-                elif question.student_answer.correctness == 0.5:
+                elif question.student_answer.correctness == 2:
                     trajectory.partially_correct_answers += 1
                     activity.number_of_partially_correct_answers += 1
                 else:
@@ -563,58 +651,19 @@ def analyze_answer(question_id: int):
     # Gathering the information about the subject, the activity, and the student
     question = EntityManager.session().query(Question).filter_by(id=question_id).first()
     trajectory = question.trajectory
-    activity = question.trajectory.activity
 
-    # Generating a question based on the selected text chunk using a Large Language Model. First, we define the system and user prompts.
-    # The system prompt comprises pre-defined instructions for the model, while the user prompt is the input from the user.
-    # We format the user prompt as an unindented multi-line string using dedent.
-    user_prompt = dedent(
-        f"""
-        =============================
-        ==== AVALIE UMA RESPOSTA ====
-        =============================
-        ---- Resposta do Estudante ----
-        {request.form['question_answer']}
-
-        ---- Resposta Esperada ----
-        {question.answer}
-        """
-    )
-
-    # Defining the foundational model for the application (using Groq API)
-    model = ChatGroq(
-        model=activity.model_name,
-        temperature=round(float(activity.model_temperature), 2),
-    )
-
-    # Calling the function that messages the LLM
-    parsed_response = {"correctness": "", "sentiment": "", "humor": "", "feedback": ""}
-    while parsed_response["correctness"] == "" or parsed_response["sentiment"] == "" or parsed_response["humor"] == "" or parsed_response["feedback"] == "":
-        response = ask_question_to_model(
-            llm_provider=activity.llm_provider,
-            llm_caller=model,
-            llm=activity.model_name,
-            system_prompt=activity.model_system_prompt,
-            user_prompt=user_prompt,
-        )
-        parsed_response = parse_answer_correctness_sentiment_humor_and_feedback(text=response)
-        print(f"\n\nParsed Model Response:\n{parsed_response}\n\n")
+    Trajectory.update(id=trajectory.id, new_attributes={"status": "generating_question"})
 
     StudentAnswer(
         content=request.form["question_answer"],
-        correctness=parsed_response["correctness"],
-        sentiment=parsed_response["sentiment"],
-        humor=parsed_response["humor"],
+        correctness=0,
+        sentiment="",
+        humor="",
         question_id=question.id,
-        descriptive_feedback=parsed_response["humor"],
+        descriptive_feedback="",
     )
 
-    # Marking the trajectory as completed if the correctness level is the maximum and the minimum number of questions was answered.
-    # Otherwise, generating a new question for the student within the trajectory based on the student's performance
-    if parsed_response["correctness"] == 3 and len(trajectory.questions) >= activity.min_questions or len(trajectory.questions) >= activity.max_questions:
-        trajectory.status = "completed"
-    else:
-        generate_question(activity_id=activity.id, student_id=trajectory.student_id)
+    Thread(target=process_student_answer_and_advance_trajectory_wrapper, args=(question.id,)).start()
 
-    flash("Resposta avaliada com sucesso!", "success")
+    flash("Sua resposta está sendo avaliada! Em breve você receberá uma nova questão ou a atividade será finalizada.", "success")
     return redirect(url_for("student_blueprint.view_active_trajectories"))

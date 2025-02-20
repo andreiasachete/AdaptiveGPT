@@ -175,7 +175,7 @@
                                                             <p class="text-black font-bold text-sm">{{ question.student_answer.sentiment }}</p>
                                                         </div>
                                                         {% else %}
-                                                        <span class="font-semibold">N/A</span>
+                                                        <span class="font-semibold pt-10 pb-10 pl-3 pr-3">N/A</span>
                                                         {% endif %} {% endfor %}
                                                     </div>
                                                 </td>
@@ -234,9 +234,9 @@
                                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     {% if question.student_answer is none %}
                                     <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
-                                    {% elif question.student_answer.correctness == 1 %}
+                                    {% elif question.student_answer.correctness == 3 %}
                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">Correta</span>
-                                    {% elif question.student_answer.correctness == 0.5 %}
+                                    {% elif question.student_answer.correctness == 2 %}
                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">Parcialmente Correta</span>
                                     {% else %}
                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg">Incorreta</span>

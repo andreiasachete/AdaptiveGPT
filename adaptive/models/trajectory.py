@@ -51,11 +51,16 @@ class Trajectory(EntityManager.base, EntityManager):
         Returns:
             object: Latest unanswered question.
         """
+        question_dict = {"id": 1, "difficulty": "", "body": ""}
+
         for question in self.questions:
             if question.student_answer is None:
-                return question
+                question_dict["id"] = question.id
+                question_dict["difficulty"] = question.difficulty
+                question_dict["body"] = question.body
+                break
 
-        return None
+        return question_dict
 
     @property
     def last_answered_question(self) -> object:

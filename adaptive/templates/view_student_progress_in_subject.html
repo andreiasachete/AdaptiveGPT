@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
     <head>
         {% include "partials/_header.html" %}
@@ -109,9 +109,9 @@
                                                 <td class="p-3 pr-0 text-end">
                                                     {% if question.student_answer is none %}
                                                     <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
-                                                    {% elif question.student_answer.correctness == 1 %}
+                                                    {% elif question.student_answer.correctness == 3 %}
                                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">Correta</span>
-                                                    {% elif question.student_answer.correctness == 0.5 %}
+                                                    {% elif question.student_answer.correctness == 2 %}
                                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">Parcialmente Correta</span>
                                                     {% else %}
                                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-danger bg-danger-light rounded-lg">Incorreta</span>

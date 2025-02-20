@@ -76,6 +76,9 @@ def view_students():
     # Gathering all students that belong to the teacher's organization
     teacher = Teacher.find_by_id(id=session["teacher_id"])
     students = EntityManager.session().query(Student).filter(Student.organization_id == teacher.organization_id).all()
+    print(f"Teacher Organization: {teacher.organization_id}")
+    for student in students:
+        print(f"Student Organization: {student.organization_id}")
 
     return render_template("view_students.html", students=students)
 

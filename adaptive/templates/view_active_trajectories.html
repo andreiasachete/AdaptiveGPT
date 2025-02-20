@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="h-full bg-white">
     <head>
         {% include "partials/_header.html" %}
@@ -52,11 +52,22 @@
                                                         </div>
                                                     </div>
                                                 </td>
+                                                {% if trajectory.status == 'generating_question' %}
                                                 <td class="p-3 pr-0 text-start">
-                                                    <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question.difficulty }}</span>
+                                                    <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
                                                 </td>
                                                 <td class="p-3 pr-0 text-start">
-                                                    <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question.body }}</span>
+                                                    <span class="font-semibold text-light-inverse text-md/normal">Questão sendo gerada...</span>
+                                                </td>
+                                                <td class="p-3 pr-0 text-start">
+                                                    <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
+                                                </td>
+                                                {% else %}
+                                                <td class="p-3 pr-0 text-start">
+                                                    <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question['difficulty'] }}</span>
+                                                </td>
+                                                <td class="p-3 pr-0 text-start">
+                                                    <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question['body'] }}</span>
                                                 </td>
                                                 <td class="p-3 pr-0 text-center">
                                                     <button
@@ -67,12 +78,13 @@
                                                         Responder
                                                     </button>
                                                 </td>
+                                                {% endif %}
                                             </tr>
                                             <!-- Main modal -->
                                             <div id="modal_trajectory_{{ loop.index }}" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                                 <div class="relative p-4 w-full max-w-2xl max-h-full">
                                                     <!-- Modal content -->
-                                                    <form class="space-y-4" action="{{ url_for('activity_blueprint.analyze_answer', question_id=trajectory.last_unanswered_question.id) }}" method="POST">
+                                                    <form class="space-y-4" action="{{ url_for('activity_blueprint.analyze_answer', question_id=trajectory.last_unanswered_question['id']) }}" method="POST">
                                                         <div class="relative bg-white rounded-lg shadow-sm">
                                                             <!-- Modal header -->
                                                             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200">
@@ -89,7 +101,7 @@
                                                             </div>
                                                             <!-- Modal body -->
                                                             <div class="p-4 md:p-5 space-y-4">
-                                                                <p class="text-base leading-relaxed text-gray-500">{{ trajectory.last_unanswered_question.body }}</p>
+                                                                <p class="text-base leading-relaxed text-gray-500">{{ trajectory.last_unanswered_question['body'] }}</p>
                                                                 <div>
                                                                     <label for="question_answer" class="block mb-2 text-sm font-medium text-gray-900">Sua Resposta</label>
                                                                     <textarea

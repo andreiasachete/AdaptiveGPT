@@ -167,10 +167,10 @@ def view_student_progress(subject_id: int, student_id: int):
                 if question.student_answer is not None:
                     trajectory.questions_answered += 1
 
-                    if question.student_answer.correctness == 1:
+                    if question.student_answer.correctness == 3:
                         trajectory.fully_correct_answers += 1
                         student.number_of_fully_correct_answers += 1
-                    elif question.student_answer.correctness == 0.5:
+                    elif question.student_answer.correctness == 2:
                         trajectory.partially_correct_answers += 1
                         student.number_of_partially_correct_answers += 1
                     else:
