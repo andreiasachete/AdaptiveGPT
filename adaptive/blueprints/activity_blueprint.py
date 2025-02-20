@@ -17,6 +17,7 @@ from hashlib import sha256
 from json import dump
 from textwrap import dedent
 from multiprocessing import Process
+from threading import Thread
 
 
 # Importing generic endpoints
@@ -299,6 +300,58 @@ def generate_question_wrapper(activity_id, student_id):
         generate_question(activity_id=activity_id, student_id=student_id)
 
 
+def process_pdf_and_create_questions(activity_id: object, file_path: str):
+    from adaptive import app
+    from adaptive.models.entity_manager import EntityManager
+
+    with app.app_context():
+        activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
+        if not activity:
+            return
+
+        # Processing the PDF file content
+        converter = DocumentConverter()
+        raw_text = converter.convert(file_path).document.export_to_text()
+        text = fix_accents(raw_text)
+
+        # Splitting the text into parts with a maximum of tokens (this value should be adjusted according to the model's requirements)
+        raw_text_chunks = split_text(text, MAX_TOKENS)
+
+        # Creating JSON file to store the text chunks and pushing the text chunks into the file
+        text_chunks = []
+        number_of_chunks = 0
+        print("\n\nText Chunks:\n")
+        for text_chunk in raw_text_chunks:
+            # Generating the text chunk metadata
+            number_of_chunks += 1
+            identifier = sha256(f"{number_of_chunks}_{text_chunk}".encode("utf-8")).hexdigest()
+
+            # Saving the text chunk metadata into the text_chunks list
+            text_chunks.append({"identifier": identifier, "content": text_chunk})
+
+            # Creating a TextChunk instance in the database
+            TextChunk(identifier=identifier, activity_id=activity.id)
+            print(f"{text_chunk}")
+        print("\n\n")
+
+        # Storing the text chunks into the JSON file
+        with open(activity.text_chunks_file_path, "w", encoding="utf-8") as file:
+            dump(text_chunks, file, ensure_ascii=False, indent=4)
+
+        # Generating questions for each student in the subject
+        processes = []
+        for student in activity.subject.students:
+            proc = Process(target=generate_question_wrapper, args=(activity.id, student.id))
+            processes.append(proc)
+            proc.start()
+        for proc in processes:
+            proc.join()
+
+        # Marking the activity as completed after generating the questions for all students
+        activity.creation_status = "completed"
+        Activity.update(id=activity.id, new_attributes={"creation_status": "completed"})
+
+
 @activity_blueprint.route("/subjects/<int:subject_id>/activities/<int:activity_id>", methods=["GET"])
 @require_authentication(user_type="teacher")
 def view_activity(subject_id: int, activity_id: int):
@@ -482,14 +535,6 @@ def create_activity(subject_id: int):
     file_path = path.join(UPLOAD_DIRECTORY, new_filename)
     base_material.save(file_path)
 
-    # Processing the PDF file content
-    converter = DocumentConverter()
-    raw_text = converter.convert(file_path).document.export_to_text()
-    text = fix_accents(raw_text)
-
-    # Splitting the text into parts with a maximum of tokens (this value should be adjusted according to the model's requirements)
-    raw_text_chunks = split_text(text, MAX_TOKENS)
-
     # Defining the name of the JSON file that will store the activity text chunks
     text_chunk_file_name = f"{timestamp}_text_chunks.json"
     text_chunks_file_path = path.join(UPLOAD_DIRECTORY, text_chunk_file_name)
@@ -506,31 +551,7 @@ def create_activity(subject_id: int):
         subject_id=subject_id,
         text_chunks_file_path=text_chunks_file_path,
     )
-
-    # Creating JSON file to store the text chunks and pushing the text chunks into the file
-    text_chunks = []
-    number_of_chunks = 0
-    print("\n\nText Chunks:\n")
-    for text_chunk in raw_text_chunks:
-        # Generating the text chunk metadata
-        number_of_chunks += 1
-        identifier = sha256(f"{number_of_chunks}_{text_chunk}".encode("utf-8")).hexdigest()
-
-        # Saving the text chunk metadata into the text_chunks list
-        text_chunks.append({"identifier": identifier, "content": text_chunk})
-
-        # Creating a TextChunk instance in the database
-        TextChunk(identifier=identifier, activity_id=activity.id)
-        print(f"{text_chunk}")
-    print("\n\n")
-
-    # Storing the text chunks into the JSON file
-    with open(text_chunks_file_path, "w", encoding="utf-8") as file:
-        dump(text_chunks, file, ensure_ascii=False, indent=4)
-
-    # Generating questions for each student in the subject
-    for student in subject.students:
-        Process(target=generate_question_wrapper, args=(activity.id, student.id)).start()
+    Thread(target=process_pdf_and_create_questions, args=(activity.id, file_path)).start()
 
     flash("Atividade criada com sucesso! As questões estão sendo geradas e estarão disponíveis em breve.", "success")
     return redirect(url_for("activity_blueprint.view_activity", subject_id=subject.id, activity_id=activity.id))

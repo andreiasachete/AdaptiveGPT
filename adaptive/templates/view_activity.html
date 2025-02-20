@@ -53,6 +53,20 @@
             <hr />
         </div>
 
+        {% if activity.creation_status == "pending" %}
+
+        <div class="container mx-auto px-4">
+            <br />
+            <br />
+            <h3 class="text-3xl font-bold text-gray-900">A atividade ainda está sendo criada.</h3>
+            <h4 class="text-2xl font-medium text-gray-900">Assim que estiver pronta, você poderá visualizar as questões e o desempenho dos estudantes.</h4>
+            <p class="mt-6 text-lg/4 text-gray-600">Reinicie a página para obter as informações mais recentes sobre o status da atividade.</p>
+            <br />
+            <br />
+        </div>
+
+        {% elif activity.creation_status == "completed" %}
+
         <div class="container mx-auto px-4">
             <br />
             <br />
@@ -176,7 +190,6 @@
                 </div>
             </div>
         </div>
-
         <div class="container mx-auto px-4">
             <br />
             <br />
@@ -247,6 +260,8 @@
             <br />
             <br />
         </div>
+
+        {% endif %}
 
         <script>
             var percentage_fully_correct_answers = {{activity.percentage_fully_correct_answers | tojson }}

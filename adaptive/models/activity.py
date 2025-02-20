@@ -14,6 +14,7 @@ class Activity(EntityManager.base, EntityManager):
 
     # Defining the table columns
     id = Column(Integer, primary_key=True, autoincrement=True)
+    creation_status = Column(String(80), nullable=False)
     base_material = Column(String(180), nullable=False)
     text_chunks_file_path = Column(String(600), nullable=False)
     min_questions = Column(Integer, nullable=False)
@@ -61,6 +62,7 @@ class Activity(EntityManager.base, EntityManager):
             object: Initialized object instance.
         """
         self.subject_id = subject_id
+        self.creation_status = "pending"
         self.base_material = base_material
         self.text_chunks_file_path = text_chunks_file_path
         self.min_questions = min_questions
