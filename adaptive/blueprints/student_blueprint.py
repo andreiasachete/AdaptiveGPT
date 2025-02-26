@@ -93,10 +93,16 @@ def view_active_trajectories():
     student = EntityManager.session().query(Student).filter_by(id=session["student_id"]).first()
 
     active_trajectories = []
-    trajectories_with_questions_being_generated = 0
+    active_trajectories_with_questions_being_generated = 0
+    active_trajectories_with_no_pending_questions = 0
     for trajectory in student.trajectories:
-        if trajectory.status == "generating_question":
-            trajectories_with_questions_being_generated += 1
+        trajectory.questions_answered_by_student = len([question for question in trajectory.questions if question.student_answer is not None])
+
+        if trajectory.questions_answered_by_student == trajectory.activity.max_questions:
+            active_trajectories_with_no_pending_questions += 1
+
+        if trajectory.status == "generating_question" and trajectory.questions_answered_by_student < trajectory.activity.max_questions:
+            active_trajectories_with_questions_being_generated += 1
 
         if trajectory.activity.creation_status == "completed" and trajectory.status != "completed":
             active_trajectories.append(trajectory)
@@ -105,5 +111,6 @@ def view_active_trajectories():
         "view_active_trajectories.html",
         student=student,
         active_trajectories=active_trajectories,
-        trajectories_with_questions_being_generated=trajectories_with_questions_being_generated,
+        active_trajectories_with_questions_being_generated=active_trajectories_with_questions_being_generated,
+        active_trajectories_with_no_pending_questions=active_trajectories_with_no_pending_questions,
     )

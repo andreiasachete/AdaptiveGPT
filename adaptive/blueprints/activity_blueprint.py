@@ -530,10 +530,6 @@ def view_activity(subject_id: int, activity_id: int):
         activity.percentage_partially_correct_answers = 0
         activity.percentage_incorrect_answers = 0
 
-    print(f"activity.percentage_fully_correct_answers: {activity.percentage_fully_correct_answers}")
-    print(f"activity.percentage_partially_correct_answers: {activity.percentage_partially_correct_answers}")
-    print(f"activity.percentage_incorrect_answers: {activity.percentage_incorrect_answers}")
-
     activity.sentiment_names = list(activity.answer_sentiments.keys())
     activity.number_of_answers_per_sentiment = list(activity.answer_sentiments.values())
 
