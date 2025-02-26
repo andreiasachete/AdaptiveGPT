@@ -15,7 +15,9 @@
                 <span class="text-cyan-500">{{ student.name }}</span>
                 !
             </h2>
+            {% if active_trajectories | length != active_trajectories_with_no_pending_questions or active_trajectories_with_no_pending_questions == 0 %}
             <p class="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8">Abaixo estão as trajetórias que você ainda não completou. Clique em "Responder" para iniciar cada atividade.</p>
+            {% endif %}
             <br />
             <br />
             {% if active_trajectories_with_questions_being_generated > 0 %}
@@ -147,19 +149,10 @@
                                     </table>
                                 </div>
                             </div>
-                            {% else %} {% if student.trajectories | length == 0 %}
+                            {% else %} {% if active_trajectories | length == 0 %}
                             <br />
                             <br />
                             <h2 class="text-center text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Neste momento, não há atividades para responder.</h2>
-                            <br />
-                            <br />
-                            {% else %}
-                            <br />
-                            <br />
-                            <h2 class="text-center text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                                <span class="text-cyan-500">Parabéns!</span>
-                                Você finalizou a atividade!
-                            </h2>
                             <br />
                             <br />
                             {% endif %} {% endif %}

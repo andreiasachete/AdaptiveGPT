@@ -98,7 +98,7 @@ def view_active_trajectories():
     for trajectory in student.trajectories:
         trajectory.questions_answered_by_student = len([question for question in trajectory.questions if question.student_answer is not None])
 
-        if trajectory.questions_answered_by_student == trajectory.activity.max_questions:
+        if trajectory.status != "completed" and trajectory.questions_answered_by_student == trajectory.activity.max_questions:
             active_trajectories_with_no_pending_questions += 1
 
         if trajectory.status == "generating_question" and trajectory.questions_answered_by_student < trajectory.activity.max_questions:
