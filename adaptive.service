@@ -1,0 +1,21 @@
+# In Linux OSses, this file should be placed at /etc/systemd/system/adaptive.service
+# Once the service and socket files are created, run the following commands (with root privileges) to enable and start the service:
+# systemctl daemon-reload
+# systemctl start adaptive.service
+# systemctl enable adaptive.service
+[Unit]
+Description=gunicorn instance to serve the AdaptiveGPT app
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/home/fabiorossi/AdaptiveGPT
+
+ExecStart=/root/.cache/pypoetry/virtualenvs/adaptive-C9QxaqfR-py3.10/bin/gunicorn -w 8 -b 0.0.0.0:80 adaptive:app --timeout 3600 --access-logfile /home/fabiorossi/AdaptiveGPT/gunicorn_accesses.log --error-logfile /home/fabiorossi/AdaptiveGPT/gunicorn_errors.log --log-level debug
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

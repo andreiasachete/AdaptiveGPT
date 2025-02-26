@@ -71,7 +71,7 @@ class Student(EntityManager.base, EntityManager):
 
         questions_answered_correctly = 0
         for question in questions_answered:
-            if question.student_answer.correctness == 1:
+            if question.student_answer.correctness == 3:
                 questions_answered_correctly += 1
 
         return round((questions_answered_correctly / len(questions_answered)) * 100, 2)

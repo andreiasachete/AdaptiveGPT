@@ -175,7 +175,7 @@
                                                             <p class="text-black font-bold text-sm">{{ question.student_answer.sentiment }}</p>
                                                         </div>
                                                         {% else %}
-                                                        <span class="font-semibold pt-10 pb-10 pl-3 pr-3">N/A</span>
+                                                        <span class="font-semibold pt-10 pb-10 pl-3 pr-3">Não Respondido.</span>
                                                         {% endif %} {% endfor %}
                                                     </div>
                                                 </td>
@@ -227,13 +227,13 @@
                             </div>
                             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt class="text-sm/6 font-medium text-gray-900">Resposta Informada</dt>
-                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.content }} {% endif %}</dd>
+                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} Não Respondido. {% else %} {{ question.student_answer.content }} {% endif %}</dd>
                             </div>
                             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt class="text-sm/6 font-medium text-gray-900">Corretude</dt>
                                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
                                     {% if question.student_answer is none %}
-                                    <span class="font-semibold text-light-inverse text-md/normal">N/A</span>
+                                    <span class="font-semibold text-light-inverse text-md/normal">Não Respondido.</span>
                                     {% elif question.student_answer.correctness == 3 %}
                                     <span class="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-success bg-success-light rounded-lg">Correta</span>
                                     {% elif question.student_answer.correctness == 2 %}
@@ -245,11 +245,11 @@
                             </div>
                             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt class="text-sm/6 font-medium text-gray-900">Sentimento</dt>
-                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.sentiment }} {% endif %}</dd>
+                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} Não Respondido. {% else %} {{ question.student_answer.sentiment }} {% endif %}</dd>
                             </div>
                             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt class="text-sm/6 font-medium text-gray-900">Humor</dt>
-                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} N/A {% else %} {{ question.student_answer.humor }} {% endif %}</dd>
+                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} Não Respondido. {% else %} {{ question.student_answer.humor }} {% endif %}</dd>
                             </div>
                         </dl>
                     </div>

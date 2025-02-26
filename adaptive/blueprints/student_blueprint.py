@@ -57,29 +57,21 @@ def dashboard():
 
         # Calculating the percentage values of the trajectory
         if trajectory.questions_answered > 0:
-            trajectory.percentage_fully_correct_answers = round((trajectory.fully_correct_answers / trajectory.questions_answered) * 100, 2)
-            trajectory.percentage_partially_correct_answers = round((trajectory.partially_correct_answers / trajectory.questions_answered) * 100, 2)
-            trajectory.percentage_incorrect_answers = round((trajectory.incorrect_answers / trajectory.questions_answered) * 100, 2)
-
-            student.percentage_fully_correct_answers += trajectory.percentage_fully_correct_answers
-            student.percentage_partially_correct_answers += trajectory.percentage_partially_correct_answers
-            student.percentage_incorrect_answers += trajectory.percentage_incorrect_answers
+            trajectory.percentage_fully_correct_answers = round((trajectory.fully_correct_answers * 100 / trajectory.questions_answered), 2)
+            trajectory.percentage_partially_correct_answers = round((trajectory.partially_correct_answers * 100 / trajectory.questions_answered), 2)
+            trajectory.percentage_incorrect_answers = round((trajectory.incorrect_answers * 100 / trajectory.questions_answered), 2)
         else:
             trajectory.percentage_fully_correct_answers = 0
             trajectory.percentage_partially_correct_answers = 0
             trajectory.percentage_incorrect_answers = 0
 
-            student.percentage_fully_correct_answers = 0
-            student.percentage_partially_correct_answers = 0
-            student.percentage_incorrect_answers = 0
-
     student.total_questions_answered = (
         student.number_of_fully_correct_answers + student.number_of_partially_correct_answers + student.number_of_incorrect_answers
     )
     if student.total_questions_answered > 0:
-        student.percentage_fully_correct_answers = round(student.percentage_fully_correct_answers / student.total_questions_answered, 2)
-        student.percentage_partially_correct_answers = round(student.percentage_partially_correct_answers / student.total_questions_answered, 2)
-        student.percentage_incorrect_answers = round(student.percentage_incorrect_answers / student.total_questions_answered, 2)
+        student.percentage_fully_correct_answers = round(student.number_of_fully_correct_answers * 100 / student.total_questions_answered, 2)
+        student.percentage_partially_correct_answers = round(student.number_of_partially_correct_answers * 100 / student.total_questions_answered, 2)
+        student.percentage_incorrect_answers = round(student.number_of_incorrect_answers * 100 / student.total_questions_answered, 2)
     else:
         student.percentage_fully_correct_answers = 0
         student.percentage_partially_correct_answers = 0

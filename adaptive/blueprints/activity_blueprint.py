@@ -467,11 +467,6 @@ def view_activity(subject_id: int, activity_id: int):
     questions = []
 
     for trajectory in activity.trajectories:
-        trajectory.questions_answered = 0
-        trajectory.fully_correct_answers = 0
-        trajectory.partially_correct_answers = 0
-        trajectory.incorrect_answers = 0
-
         questions.extend(trajectory.questions)
 
         for index, question in enumerate(trajectory.questions):
@@ -508,15 +503,11 @@ def view_activity(subject_id: int, activity_id: int):
                     question.difficulty_image = "img/difficulty3.png"
 
                 # Processing information to be displayed in the activity graphs
-                trajectory.questions_answered += 1
                 if question.student_answer.correctness == 3:
-                    trajectory.fully_correct_answers += 1
                     activity.number_of_fully_correct_answers += 1
                 elif question.student_answer.correctness == 2:
-                    trajectory.partially_correct_answers += 1
                     activity.number_of_partially_correct_answers += 1
                 else:
-                    trajectory.incorrect_answers += 1
                     activity.number_of_incorrect_answers += 1
 
                 if question.student_answer.sentiment not in activity.answer_sentiments:
@@ -527,35 +518,21 @@ def view_activity(subject_id: int, activity_id: int):
                     activity.answer_humors[question.student_answer.humor] = 0
                 activity.answer_humors[question.student_answer.humor] += 1
 
-        # Calculating the percentage values of the trajectory
-        if trajectory.questions_answered > 0:
-            trajectory.percentage_fully_correct_answers = round((trajectory.fully_correct_answers / trajectory.questions_answered) * 100, 2)
-            trajectory.percentage_partially_correct_answers = round((trajectory.partially_correct_answers / trajectory.questions_answered) * 100, 2)
-            trajectory.percentage_incorrect_answers = round((trajectory.incorrect_answers / trajectory.questions_answered) * 100, 2)
-
-            activity.percentage_fully_correct_answers += trajectory.percentage_fully_correct_answers
-            activity.percentage_partially_correct_answers += trajectory.percentage_partially_correct_answers
-            activity.percentage_incorrect_answers += trajectory.percentage_incorrect_answers
-        else:
-            trajectory.percentage_fully_correct_answers = 0
-            trajectory.percentage_partially_correct_answers = 0
-            trajectory.percentage_incorrect_answers = 0
-
-            activity.percentage_fully_correct_answers = 0
-            activity.percentage_partially_correct_answers = 0
-            activity.percentage_incorrect_answers = 0
-
     activity.total_questions_answered = (
         activity.number_of_fully_correct_answers + activity.number_of_partially_correct_answers + activity.number_of_incorrect_answers
     )
     if activity.total_questions_answered > 0:
-        activity.percentage_fully_correct_answers = round(activity.percentage_fully_correct_answers / activity.total_questions_answered, 2)
-        activity.percentage_partially_correct_answers = round(activity.percentage_partially_correct_answers / activity.total_questions_answered, 2)
-        activity.percentage_incorrect_answers = round(activity.percentage_incorrect_answers / activity.total_questions_answered, 2)
+        activity.percentage_fully_correct_answers = round(activity.number_of_fully_correct_answers * 100 / activity.total_questions_answered, 2)
+        activity.percentage_partially_correct_answers = round(activity.number_of_partially_correct_answers * 100 / activity.total_questions_answered, 2)
+        activity.percentage_incorrect_answers = round(activity.number_of_incorrect_answers * 100 / activity.total_questions_answered, 2)
     else:
         activity.percentage_fully_correct_answers = 0
         activity.percentage_partially_correct_answers = 0
         activity.percentage_incorrect_answers = 0
+
+    print(f"activity.percentage_fully_correct_answers: {activity.percentage_fully_correct_answers}")
+    print(f"activity.percentage_partially_correct_answers: {activity.percentage_partially_correct_answers}")
+    print(f"activity.percentage_incorrect_answers: {activity.percentage_incorrect_answers}")
 
     activity.sentiment_names = list(activity.answer_sentiments.keys())
     activity.number_of_answers_per_sentiment = list(activity.answer_sentiments.values())
