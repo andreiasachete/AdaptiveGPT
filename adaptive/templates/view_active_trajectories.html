@@ -25,6 +25,7 @@
                 <div class="w-full max-w-full px-3 mb-6 mx-auto">
                     <div class="relative flex-[1_auto] flex flex-col break-words min-w-0 bg-clip-border rounded-[.95rem] bg-white m-5">
                         <div class="relative flex flex-col min-w-0 break-words border border-dashed bg-clip-border rounded-2xl border-stone-200 bg-light/30">
+                            {% if active_trajectories | length > 0 %}
                             <div class="px-9 pt-5 flex justify-between items-stretch flex-wrap min-h-[70px] pb-0 bg-transparent">
                                 <h3 class="flex flex-col items-start justify-center m-2 ml-0 font-medium text-xl/tight text-dark">
                                     <span class="mr-3 font-semibold text-dark">Trajetórias</span>
@@ -131,6 +132,16 @@
                                     </table>
                                 </div>
                             </div>
+                            {% else %}
+                            <br />
+                            <br />
+                            <h2 class="text-center text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                <span class="text-cyan-500">Parabéns!</span>
+                                Você finalizou a atividade!
+                            </h2>
+                            <br />
+                            <br />
+                            {% endif %}
                         </div>
                     </div>
                 </div>

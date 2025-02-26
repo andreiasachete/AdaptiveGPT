@@ -113,7 +113,7 @@ class Activity(EntityManager.base, EntityManager):
             for question in trajectory.questions:
                 if question.student_answer is not None:
                     total += 1
-                    if question.student_answer.correctness == 1:
+                    if question.student_answer.correctness == 3:
                         correct += 1
 
         return round((correct / total) * 100, 2) if total > 0 else 0
