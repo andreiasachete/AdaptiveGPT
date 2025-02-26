@@ -37,6 +37,8 @@ def create_app():
         "mysql+pymysql://root:root@localhost/adaptive",
         pool_pre_ping=True,
         pool_recycle=3600,
+        pool_size=100,
+        max_overflow=0,
     )
     EntityManager.base.metadata.create_all(EntityManager.engine)
     EntityManager.session_maker = sessionmaker(bind=EntityManager.engine)

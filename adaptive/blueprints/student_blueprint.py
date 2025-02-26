@@ -93,8 +93,17 @@ def view_active_trajectories():
     student = EntityManager.session().query(Student).filter_by(id=session["student_id"]).first()
 
     active_trajectories = []
+    trajectories_with_questions_being_generated = 0
     for trajectory in student.trajectories:
+        if trajectory.status == "generating_question":
+            trajectories_with_questions_being_generated += 1
+
         if trajectory.activity.creation_status == "completed" and trajectory.status != "completed":
             active_trajectories.append(trajectory)
 
-    return render_template("view_active_trajectories.html", student=student, active_trajectories=active_trajectories)
+    return render_template(
+        "view_active_trajectories.html",
+        student=student,
+        active_trajectories=active_trajectories,
+        trajectories_with_questions_being_generated=trajectories_with_questions_being_generated,
+    )

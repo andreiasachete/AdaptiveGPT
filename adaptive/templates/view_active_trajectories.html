@@ -18,6 +18,12 @@
             <p class="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8">Abaixo estão as trajetórias que você ainda não completou. Clique em "Responder" para iniciar cada atividade.</p>
             <br />
             <br />
+            {% if trajectories_with_questions_being_generated > 0 %}
+            <div class="p-4 mb-4 text-lg text-cyan-900 rounded-lg bg-cyan-100" role="alert">
+                <span class="font-bold">Atenção!</span>
+                Atualize essa página para verificar se novas questões foram atribuídas a você.
+            </div>
+            {% endif %}
         </div>
 
         <div class="container mx-auto px-4">
@@ -132,6 +138,12 @@
                                     </table>
                                 </div>
                             </div>
+                            {% else %} {% if student.trajectories | length == 0 %}
+                            <br />
+                            <br />
+                            <h2 class="text-center text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Neste momento, não há atividades para você responder.</h2>
+                            <br />
+                            <br />
                             {% else %}
                             <br />
                             <br />
@@ -141,7 +153,7 @@
                             </h2>
                             <br />
                             <br />
-                            {% endif %}
+                            {% endif %} {% endif %}
                         </div>
                     </div>
                 </div>
