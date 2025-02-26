@@ -33,7 +33,11 @@ def create_app():
     app.carbon_copy_addresses = getenv("CARBON_COPY_ADDRESSES")
 
     # Defining the database connection (the database URL is hardcoded for brevity, which is not recommended)
-    EntityManager.engine = create_engine("mysql+pymysql://root:root@localhost/adaptive")
+    EntityManager.engine = create_engine(
+        "mysql+pymysql://root:root@localhost/adaptive",
+        pool_pre_ping=True,
+        pool_recycle=3600,
+    )
     EntityManager.base.metadata.create_all(EntityManager.engine)
     EntityManager.session_maker = sessionmaker(bind=EntityManager.engine)
     EntityManager.session = scoped_session(EntityManager.session_maker)
