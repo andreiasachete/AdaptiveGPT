@@ -224,10 +224,7 @@ def generate_question(activity_id: int, student_id: int):
         last_answered_question = trajectory.last_answered_question
         if last_answered_question is not None:
             difficulty = int(last_answered_question.difficulty)
-            if last_answered_question.student_answer.correctness == 1:
-                difficulty = max(1, difficulty - 1)
-                difficulty_increased = False
-            elif last_answered_question.student_answer.correctness == 3:
+            if last_answered_question.student_answer.correctness == 3:
                 difficulty = min(3, difficulty + 1)
 
     # Selecting one of the text chunks of the activity to generate a question. To provide a better experience for the student,
