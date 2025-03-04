@@ -13,7 +13,6 @@ class EntityManager:
         Returns:
             object: Instance of the class being instantiated.
         """
-        print(f"Instância {self} criada com sucesso.")
         # Creating a new session to perform the transaction
         current_session = EntityManager.session()
 
@@ -22,6 +21,8 @@ class EntityManager:
 
         # Confirming the transaction
         current_session.commit()
+
+        print(f"Instância {self} criada com sucesso.")
 
         return self
 

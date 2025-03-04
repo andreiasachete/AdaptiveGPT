@@ -9,7 +9,6 @@ from adaptive.models.text_chunk import TextChunk
 
 # Importing native modules
 from os import SEEK_END, path, makedirs, getcwd
-from time import sleep
 from random import random
 from time import time
 from re import sub, UNICODE, compile, DOTALL
@@ -411,6 +410,7 @@ def process_student_answer_and_advance_trajectory(question_id: int):
             temperature=activity.model_temperature,
         )
         parsed_response = parse_answer_correctness_sentiment_humor_and_feedback(text=response)
+        print(f"\n\nRaw Model Response:\n{response}\n\n")
         print(f"\n\nParsed Model Response:\n{parsed_response}\n\n")
 
     StudentAnswer.update(

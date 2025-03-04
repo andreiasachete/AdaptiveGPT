@@ -9,8 +9,12 @@ from adaptive.models.subject_student import SubjectStudent
 from adaptive.models.student import Student
 from adaptive.models.teacher import Teacher
 
+# Importing native modules
+from multiprocessing import Process
+
 # Importing generic endpoints
 from adaptive.blueprints.generic_blueprint import require_authentication
+from adaptive.blueprints.activity_blueprint import generate_question_wrapper
 
 # Importing Flask packages and modules
 from flask import Blueprint, render_template, redirect, url_for, session, request, flash
@@ -69,15 +73,22 @@ def new_subject_student(subject_id: int):
     return render_template("register_students_to_subject.html", subject=subject, students=students)
 
 
-def remove_student_from_subject(student: object, subject: object):
+def remove_student_from_subject(student_id: int, subject_id: int):
+    student = EntityManager.session().query(Student).filter_by(id=student_id).first()
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
+
     subject_activities_ids = [activity.id for activity in EntityManager.session().query(Activity).filter_by(subject_id=subject.id).all()]
     subject_student = EntityManager.session().query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
 
     if subject_student is not None:
         for trajectory in student.trajectories:
             if trajectory.activity_id in subject_activities_ids:
+                trajectory = EntityManager.session().query(Trajectory).filter_by(id=trajectory.id).first()
                 for question in trajectory.questions:
-                    StudentAnswer.delete(id=question.student_answer.id)
+                    question = EntityManager.session().query(Question).filter_by(id=question.id).first()
+                    if question.student_answer is not None:
+                        student_answer = EntityManager.session().query(StudentAnswer).filter_by(id=question.student_answer.id).first()
+                        StudentAnswer.delete(id=student_answer.id)
                     Question.delete(id=question.id)
                 Trajectory.delete(id=trajectory.id)
         SubjectStudent.delete(id=subject_student.id)
@@ -105,15 +116,24 @@ def create_subject_student(subject_id: int):
 
     # Removing the students that are not supposed to be registered to the subject
     for student in students_not_to_register:
-        remove_student_from_subject(student=student, subject=subject)
+        student = EntityManager.session().query(Student).filter_by(id=student.id).first()
+        subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
+        remove_student_from_subject(student_id=student.id, subject_id=subject.id)
 
     # Registering the students that are supposed to attend the subject
     for student in students_to_register:
+        student = EntityManager.session().query(Student).filter_by(id=student.id).first()
         subject_student = EntityManager.session().query(SubjectStudent).filter_by(student_id=student.id, subject_id=subject.id).first()
         if subject_student is None:
             subject_student = SubjectStudent(student_id=student.id, subject_id=subject.id)
 
+            for activity in subject.activities:
+                print(f"[Subject '{subject.name}'] Criando trajetória para a atividade {activity.id} do aluno {student.name}")
+                proc = Process(target=generate_question_wrapper, args=(activity.id, student.id))
+                proc.start()
+
     flash("Lista de alunos(as) da disciplina atualizada com sucesso!", "success")
+    subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
 
 
@@ -122,7 +142,7 @@ def create_subject_student(subject_id: int):
 def remove_subject_student(subject_id: int, student_id: int):
     subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
     student = EntityManager.session().query(Student).filter_by(id=student_id).first()
-    remove_student_from_subject(student=student, subject=subject)
+    remove_student_from_subject(student_id=student.id, subject_id=subject.id)
     flash("Aluno(a) removido(a) da disciplina com sucesso!", "success")
     return redirect(url_for("subject_blueprint.view_subject", subject_id=subject.id))
 
@@ -142,15 +162,19 @@ def view_student_progress(subject_id: int, student_id: int):
 
     subject_activities_ids = [activity.id for activity in EntityManager.session().query(Activity).filter_by(subject_id=subject.id).all()]
 
+    student.total_questions_answered = 0
     student.number_of_fully_correct_answers = 0
     student.number_of_partially_correct_answers = 0
     student.number_of_incorrect_answers = 0
     student.percentage_fully_correct_answers = 0
     student.percentage_partially_correct_answers = 0
     student.percentage_incorrect_answers = 0
-
     student.answer_sentiments = {}
     student.answer_humors = {}
+    student.humor_names = []
+    student.sentiment_names = []
+    student.number_of_answers_per_sentiment = []
+    student.number_of_answers_per_humor = []
 
     trajectories = []
     subject_trajectories = 0

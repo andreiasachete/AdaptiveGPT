@@ -114,6 +114,33 @@
                                     <!-- Caption of the icons included in the trajectory representation -->
                                     <div class="grid grid-cols-3 gap-4">
                                         <div class="text-center" style="width: 180px">
+                                            <span class="text-sm font-bold text-gray-600">
+                                                Resposta
+                                                <br />
+                                                Incorreta
+                                            </span>
+                                            <div style="width: 60px; height: 60px" class="bg-red-200 border border-gray-300 rounded-2xl shadow-md p-2 flex flex-col items-center text-center mx-auto"></div>
+                                        </div>
+                                        <div class="text-center" style="width: 180px">
+                                            <span class="text-sm font-bold text-gray-600">
+                                                Resposta
+                                                <br />
+                                                Parcialmente Correta
+                                            </span>
+                                            <div style="width: 60px; height: 60px" class="bg-yellow-200 border border-gray-300 rounded-2xl shadow-md p-2 flex flex-col items-center text-center mx-auto"></div>
+                                        </div>
+                                        <div class="text-center" style="width: 180px">
+                                            <span class="text-sm font-bold text-gray-600">
+                                                Resposta
+                                                <br />
+                                                Totalmente Correta
+                                            </span>
+                                            <div style="width: 60px; height: 60px" class="bg-green-200 border border-gray-300 rounded-2xl shadow-md p-2 flex flex-col items-center text-center mx-auto"></div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center" style="width: 180px">
                                             <span class="text-sm font-bold text-gray-600">Humor Negativo</span>
                                             <img src="{{ url_for('static', filename='img/humor_negative.png') }}" alt="Bad Mood Icon" class="mx-auto h-12 w-auto" />
                                         </div>
@@ -143,6 +170,8 @@
                                     </div>
                                 </h3>
                             </div>
+                            <br />
+                            <br />
                             <br />
                             <br />
                             <div class="flex-auto block py-8 pt-6 px-9">
