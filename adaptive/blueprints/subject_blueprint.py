@@ -28,12 +28,52 @@ def view_subject(subject_id: int):
     # Gathering the subject information
     subject = EntityManager.session().query(Subject).filter_by(id=subject_id).first()
 
+    # Gathering information about the students that are registered to the subject
+    student_ids = [
+        EntityManager.session().query(Student).filter_by(id=subject_student.student_id).first().id
+        for subject_student in EntityManager.session().query(SubjectStudent).filter_by(subject_id=subject.id).all()
+    ]
+    students = []
+
+    for student_id in student_ids:
+        student = EntityManager.session().query(Student).filter_by(id=student_id).first()
+        student_metadata = {
+            "id": student.id,
+            "name": student.name,
+            "email": student.email,
+            "questions_answered": 0,
+            "questions_answered_correctly": 0,
+            "percentage_of_questions_answered_correctly": 0,
+        }
+
+        for trajectory in student.trajectories:
+            trajectory_obj = EntityManager.session().query(Trajectory).filter_by(id=trajectory.id).first()
+
+            if trajectory_obj.activity.subject_id == subject.id:
+                for question in trajectory_obj.questions:
+                    question_obj = EntityManager.session().query(Question).filter_by(id=question.id).first()
+
+                    if question_obj.student_answer is not None:
+                        student_metadata["questions_answered"] += 1
+
+                        if question_obj.student_answer.correctness == 3:
+                            student_metadata["questions_answered_correctly"] += 1
+
+        if student_metadata["questions_answered"] > 0:
+            student_metadata["percentage_of_questions_answered_correctly"] = round(
+                (student_metadata["questions_answered_correctly"] / student_metadata["questions_answered"]) * 100, 2
+            )
+        else:
+            student_metadata["percentage_of_questions_answered_correctly"] = 0
+
+        students.append(student_metadata)
+
     # Redirecting the user to the dashboard page if the subject does not exist
     if not subject:
         flash("Disciplina não encontrada", "error")
         return redirect(url_for("teacher_blueprint.dashboard"))
 
-    return render_template("view_subject.html", subject=subject)
+    return render_template("view_subject.html", subject=subject, students=students)
 
 
 @subject_blueprint.route("/subjects/<int:subject_id>", methods=["POST"])

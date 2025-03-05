@@ -24,9 +24,9 @@ def create_app():
 
     # Getting the environment variables
     load_dotenv(dotenv_path=".env")
-    environ.setdefault("GROQ_API_KEY", getenv("GROQ_API_KEY"))
-    app.groq_api_key = getenv("GROQ_API_KEY")
-    app.gemini_api_key = getenv("GEMINI_API_KEY")
+    environ.setdefault("GROQ_API_KEYS", getenv("GROQ_API_KEYS"))
+    app.groq_api_keys = getenv("GROQ_API_KEYS").split(";")
+    app.gemini_api_keys = getenv("GEMINI_API_KEYS").split(";")
     app.gmail_password = getenv("GMAIL_PASSWORD")
     app.gmail_address = getenv("GMAIL_ADDRESS")
     app.sender_address = getenv("SENDER_ADDRESS")

@@ -3,14 +3,15 @@ from adaptive.models.entity_manager import EntityManager
 from adaptive.models.subject import Subject
 from adaptive.models.trajectory import Trajectory
 from adaptive.models.activity import Activity
+from adaptive.models.student import Student
 from adaptive.models.student_answer import StudentAnswer
 from adaptive.models.question import Question
 from adaptive.models.text_chunk import TextChunk
 
 # Importing native modules
-from os import SEEK_END, path, makedirs, getcwd
-from random import random
-from time import time
+from os import SEEK_END, path, makedirs, getcwd, environ
+from random import random, sample
+from time import time, sleep
 from re import sub, UNICODE, compile, DOTALL
 from unicodedata import normalize
 from hashlib import sha256
@@ -266,12 +267,20 @@ def generate_question(activity_id: int, student_id: int):
 
     # Defining the foundational model for the application
     if activity.llm_provider == "groq":
+        groq_api_key = sample(current_app.groq_api_keys, 1)[0]
+        environ.setdefault("GROQ_API_KEY", groq_api_key)
+        print(f"\n\n[Groq] Making request with API key: {groq_api_key}\n\n")
         llm_caller = ChatGroq(
             model=activity.model_name,
             temperature=round(float(activity.model_temperature), 2),
+            api_key=groq_api_key,
         )
     elif activity.llm_provider == "gemini":
-        llm_caller = genai.Client(api_key=current_app.gemini_api_key)
+        gemini_api_key = sample(current_app.gemini_api_keys, 1)[0]
+        print(f"\n\n[Gemini] Making request with API key: {gemini_api_key}\n\n")
+        llm_caller = genai.Client(
+            api_key=gemini_api_key,
+        )
 
     # Calling the function that messages the LLM
     parsed_response = {"body": "", "answer": ""}
@@ -312,6 +321,7 @@ def process_pdf_and_create_questions(activity_id: object, file_path: str):
     from adaptive.models.entity_manager import EntityManager
 
     with app.app_context():
+        sleep(0.5)
         activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
         if not activity:
             return
@@ -347,8 +357,12 @@ def process_pdf_and_create_questions(activity_id: object, file_path: str):
 
         # Generating questions for each student in the subject
         processes = []
-        for student in activity.subject.students:
-            proc = Process(target=generate_question_wrapper, args=(activity.id, student.id))
+        activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
+        subject = EntityManager.session().query(Subject).filter_by(id=activity.subject_id).first()
+        for student in subject.students:
+            print(f"==== [Subject={subject.name}, Atividade={activity.id}] Criando questões para o estudante {student.name} ====")
+            student_obj = EntityManager.session().query(Student).filter_by(id=student.id).first()
+            proc = Process(target=generate_question_wrapper, args=(activity.id, student_obj.id))
             processes.append(proc)
             proc.start()
         for proc in processes:
@@ -391,12 +405,20 @@ def process_student_answer_and_advance_trajectory(question_id: int):
 
     # Defining the foundational model for the application
     if activity.llm_provider == "groq":
+        groq_api_key = sample(current_app.groq_api_keys, 1)[0]
+        environ.setdefault("GROQ_API_KEY", groq_api_key)
+        print(f"\n\n[Groq] Making request with API key: {groq_api_key}\n\n")
         llm_caller = ChatGroq(
             model=activity.model_name,
             temperature=round(float(activity.model_temperature), 2),
+            api_key=groq_api_key,
         )
     elif activity.llm_provider == "gemini":
-        llm_caller = genai.Client(api_key=current_app.gemini_api_key)
+        gemini_api_key = sample(current_app.gemini_api_keys, 1)[0]
+        print(f"\n\n[Gemini] Making request with API key: {gemini_api_key}\n\n")
+        llm_caller = genai.Client(
+            api_key=gemini_api_key,
+        )
 
     # Calling the function that messages the LLM
     parsed_response = {"correctness": "", "sentiment": "", "humor": "", "feedback": ""}
