@@ -18,7 +18,6 @@ from hashlib import sha256
 from json import dump
 from textwrap import dedent
 from multiprocessing import Process
-from threading import Thread
 
 
 # Importing generic endpoints
@@ -631,7 +630,8 @@ def create_activity(subject_id: int):
         subject_id=subject_id,
         text_chunks_file_path=text_chunks_file_path,
     )
-    Thread(target=process_pdf_and_create_questions, args=(activity.id, file_path)).start()
+    proc = Process(target=process_pdf_and_create_questions, args=(activity.id, file_path))
+    proc.start()
 
     flash("Atividade criada com sucesso! As questões estão sendo geradas e estarão disponíveis em breve.", "success")
     return redirect(url_for("activity_blueprint.view_activity", subject_id=subject.id, activity_id=activity.id))
@@ -655,7 +655,8 @@ def analyze_answer(question_id: int):
         descriptive_feedback="",
     )
 
-    Thread(target=process_student_answer_and_advance_trajectory_wrapper, args=(question.id,)).start()
+    proc = Process(target=process_student_answer_and_advance_trajectory_wrapper, args=(question.id,))
+    proc.start()
 
     flash("Sua resposta está sendo avaliada! Em breve você receberá uma nova questão ou a atividade será finalizada.", "success")
     return redirect(url_for("student_blueprint.view_active_trajectories"))
