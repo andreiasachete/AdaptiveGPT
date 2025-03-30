@@ -80,6 +80,44 @@ ACCENT_REPLACEMENTS = {
 MAX_TOKENS = 800  # The maximum number of tokens per text chunk
 LLM_PROVIDER = "groq"  # The Large Language Model provider (options: "groq", "gemini")
 
+# Defining static feedback messages for the student based on the correctness of the answer
+FEEDBACK_FULLY_CORRECT_ANSWERS = [
+    "Ótimo trabalho! Você acertou em cheio!",
+    "Parabéns! Sua resposta está perfeita!",
+    "Excelente! Você demonstrou grande compreensão do tema.",
+    "Muito bem! Continue assim!",
+    "Resposta correta! Você está no caminho certo!",
+    "Você mandou muito bem! Continue se dedicando!",
+    "Incrível! Seu raciocínio está afiado!",
+    "Impressionante! Você acertou com precisão!",
+    "Parabéns pela resposta! Você mostrou domínio do assunto.",
+    "Fantástico! Você provou que estudou bastante!",
+]
+FEEDBACK_PARTIALLY_CORRECT_ANSWERS = [
+    "Você está quase lá! Só falta um pequeno ajuste.",
+    "Muito bom! Sua resposta tem pontos certos, tente refiná-la um pouco mais.",
+    "Você está no caminho certo! Revise alguns detalhes.",
+    "Boa tentativa! Só falta um pouco mais para chegar à resposta ideal.",
+    "Ótima abordagem! Só precisa de um pequeno ajuste.",
+    "Você compreendeu bem o conceito, mas pode aprofundar um pouco mais.",
+    "Sua resposta está parcialmente correta, continue tentando!",
+    "Está quase certo! Com um pequeno esforço, você chega lá!",
+    "Você captou a ideia principal, agora tente detalhar melhor.",
+    "Muito bem! Você está progredindo, tente revisar alguns pontos.",
+]
+FEEDBACK_INCORRECT_ANSWERS = [
+    "Não foi dessa vez, mas continue tentando! Você consegue!",
+    "Erros fazem parte do aprendizado! Tente novamente.",
+    "Ótima tentativa! Reveja o conceito e tente mais uma vez.",
+    "Não desista! Com um pouco mais de estudo, você chegará à resposta certa.",
+    "Ainda não está certo, mas você está no caminho da aprendizagem!",
+    "Errar faz parte do processo! Aprenda com isso e tente de novo!",
+    "Não se preocupe! Refaça com calma e você chegará lá!",
+    "Cada erro é uma chance de aprender! Continue praticando.",
+    "Vamos lá! Você pode melhorar essa resposta, reveja o conteúdo.",
+    "Sua resposta ainda não está certa, mas continue tentando e aprendendo!",
+]
+
 
 def fix_accents(text: str) -> str:
     # Replacing incorrect sequences of characters through regular expressions
@@ -433,6 +471,20 @@ def process_student_answer_and_advance_trajectory(question_id: int):
         parsed_response = parse_answer_correctness_sentiment_humor_and_feedback(text=response)
         print(f"\n\nRaw Model Response:\n{response}\n\n")
         print(f"\n\nParsed Model Response:\n{parsed_response}\n\n")
+
+    # Defining the feedback message based on the correctness of the answer
+    if parsed_response["correctness"] == 3:
+        parsed_response["feedback"] = sample(FEEDBACK_FULLY_CORRECT_ANSWERS, 1)[0]
+    elif parsed_response["correctness"] == 2:
+        parsed_response["feedback"] = sample(FEEDBACK_PARTIALLY_CORRECT_ANSWERS, 1)[0]
+    else:
+        parsed_response["feedback"] = sample(FEEDBACK_INCORRECT_ANSWERS, 1)[0]
+
+    print("\n\n")
+    print(f"\Raw Model Response:\n{response}")
+    print("\n\n")
+    print(f"Parsed Model Response:\n{parsed_response}")
+    print("\n\n")
 
     StudentAnswer.update(
         id=student_answer.id,
