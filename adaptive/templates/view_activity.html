@@ -273,6 +273,16 @@
                                 </dd>
                             </div>
                             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                                <dt class="text-sm/6 font-medium text-gray-900">Feedback Descritivo</dt>
+                                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+                                    {% if question.student_answer is none %}
+                                    <span class="font-semibold text-light-inverse text-md/normal">Não Respondido.</span>
+                                    {% else %}
+                                    <span class="-semibold text-light-inverse text-md/normal">{{ question.student_answer.descriptive_feedback }}</span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
                                 <dt class="text-sm/6 font-medium text-gray-900">Sentimento</dt>
                                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">{% if question.student_answer is none %} Não Respondido. {% else %} {{ question.student_answer.sentiment }} {% endif %}</dd>
                             </div>
