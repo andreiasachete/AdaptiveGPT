@@ -77,7 +77,7 @@ ACCENT_REPLACEMENTS = {
 }
 
 # Defining constants for LLM interaction
-MAX_TOKENS = 800  # The maximum number of tokens per text chunk
+MAX_TOKENS = 2500  # The maximum number of tokens per text chunk
 LLM_PROVIDER = "groq"  # The Large Language Model provider (options: "groq", "gemini")
 
 # Defining static feedback messages for the student based on the correctness of the answer
@@ -230,7 +230,7 @@ def parse_answer_correctness_sentiment_humor_and_feedback(text):
     }
 
 
-def generate_question(activity_id: int, student_id: int):
+def generate_question(activity_id: int, student_id: int, always_change_question_context: bool = True):
     # Gathering the information about the subject, the activity, and the student
     activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
 
@@ -254,15 +254,27 @@ def generate_question(activity_id: int, student_id: int):
     # ================================================================================================
     # Once the maximum difficulty level (3) is reached, the level is maintained until the minimum
     # number of questions is answered correctly (activity.min_questions).
-    difficulty_increased = True
     if len(trajectory.questions) == 0:
         difficulty = 1
+        difficulty_increased = False
     else:
         last_answered_question = trajectory.last_answered_question
         if last_answered_question is not None:
             difficulty = int(last_answered_question.difficulty)
             if last_answered_question.student_answer.correctness == 3:
                 difficulty = min(3, difficulty + 1)
+                difficulty_increased = True
+
+    # If the difficulty level has been increased, we ensure that the next question is generated
+    # with a different context to provide a better experience for the student. Specifically:
+    # 1. IF difficulty has been increased: "reverse_order" = False, as we want to change the context.
+    # 2. IF difficulty has not been increased: "reverse_order" = True, as we want to keep the context.
+    # The condition "always_change_question_context" allows the user to force the change of context
+    # regardless of changes in difficulty level.
+    if difficulty_increased or always_change_question_context:
+        reversed_order = False
+    else:
+        reversed_order = True
 
     # Selecting one of the text chunks of the activity to generate a question. To provide a better experience for the student,
     # we sort the text chunks in such a way that chunks less frequently used in previous questions within the trajectory are
@@ -274,14 +286,7 @@ def generate_question(activity_id: int, student_id: int):
 
     # Sorting the text chunks (dict keys) based on the number of times they were used in
     # previous questions (dict values) and transforming the sorted keys into a list of text chunks
-    sorted_text_chunks = [
-        key
-        for key, value in sorted(
-            text_chunks.items(),
-            key=lambda item: (item[1], random()),
-            reverse=difficulty_increased,
-        )
-    ]
+    sorted_text_chunks = [key for key, value in sorted(text_chunks.items(), key=lambda item: item[1], reverse=reversed_order)]
 
     # Selecting the first text chunk of the sorted list to generate a question
     text_chunk = EntityManager.session().query(TextChunk).filter_by(identifier=sorted_text_chunks[0]).first()
@@ -481,7 +486,7 @@ def process_student_answer_and_advance_trajectory(question_id: int):
         parsed_response["feedback"] = sample(FEEDBACK_INCORRECT_ANSWERS, 1)[0]
 
     print("\n\n")
-    print(f"\Raw Model Response:\n{response}")
+    print(f"Raw Model Response:\n{response}")
     print("\n\n")
     print(f"Parsed Model Response:\n{parsed_response}")
     print("\n\n")
