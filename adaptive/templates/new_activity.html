@@ -66,11 +66,11 @@
                                             <option value="[groq] llama3-70b-8192">[Groq] llama3-70b-8192</option>
                                             <option value="[groq] llama-3.3-70b-versatile">[Groq] llama-3.3-70b-versatile</option>
                                             <option value="[groq] llama-3.1-8b-instant">[Groq] llama-3.1-8b-instant</option>
-                                            <option value="[groq] deepseek-r1-distill-llama-70b">[Groq] deepseek-r1-distill-llama-70b</option>
+                                            <option selected value="[groq] deepseek-r1-distill-llama-70b">[Groq] deepseek-r1-distill-llama-70b</option>
                                             <option value="[groq] deepseek-r1-distill-qwen-32b">[Groq] deepseek-r1-distill-qwen-32b</option>
                                             <option value="[groq] mixtral-8x7b-32768">[Groq] mixtral-8x7b-32768</option>
                                             <option value="[groq] qwen-2.5-32b">[Groq] qwen-2.5-32b</option>
-                                            <option selected value="[gemini] gemini-2.0-flash">[Gemini] gemini-2.0-flash</option>
+                                            <option value="[gemini] gemini-2.0-flash">[Gemini] gemini-2.0-flash</option>
                                             <option value="[gemini] gemini-2.0-flash-lite-preview-02-05">[Gemini] gemini-2.0-flash-lite-preview-02-05</option>
                                             <option value="[gemini] gemini-1.5-flash">[Gemini] gemini-1.5-flash</option>
                                             <option value="[gemini] gemini-1.5-flash-8b">[Gemini] gemini-1.5-flash-8b</option>
@@ -99,20 +99,8 @@
 Quero que você atue como um assistente educacional para professores.
 
 Você será chamado em duas circunstâncias:
-1. Para ajudar professores a criar questões.
-2. Para ajudar professores a avaliar respostas dos estudantes.
 
-Quando o professor solicitar (caso 1 — ajudar professores a criar questões):
-```
-===============================
-==== GERE UMA NOVA QUESTÃO ====
-===============================
----- Dificuldade ----
-[1, 2 ou 3, a ser informado pelo professor].
-
----- Conteúdo-Base ----
-[Texto base informado pelo professor]
-```
+==== Circunstância 1: Ajudar professores a criar questões ====
 
 Você deve ler o texto-base informado pelo professor e criar uma questão
 discursiva de acordo com os seguintes níveis de dificuldade, informados
@@ -132,26 +120,13 @@ O formato da sua resposta deve ser:
 [Resposta correta aqui]
 <END-RESPOSTA-ESPERADA>
 ```
---------
 
-IMPORTANTE: Priorize sempre gerar a pergunta no mesmo idioma do texto-base informado, e com enunciado claro e objetivo. Priorize enunciados autocontidos, que não necessitem de informações adicionais para serem compreendidos para responder a questão. Os enunciados devem apresentar todas as informações necessárias para responder à questão diretamente no enunciado.
+OBSERVAÇÕES SOBRE AS QUESTÕES A SEREM GERADAS:
+1. Priorize sempre gerar a pergunta no mesmo idioma do texto-base informado.
+2. Priorize enunciados autocontidos, que não necessitem de informações adicionais para serem compreendidos para responder a questão.
+3. Evite perguntas que exijam respostas muito longas ou complexas.
 
-
-=====================
-
-
-Quando o professor solicitar (caso 2 — ajudar professores a avaliar respostas dos estudantes):
-
-```
-=============================
-==== AVALIE UMA RESPOSTA ====
-=============================
----- Resposta ----
-[Texto da resposta do estudante]
-
----- Resposta Esperada ----
-[Texto da resposta esperada]
-```
+==== Circunstância 2: Ajudar professores a avaliar respostas dos estudantes ====
 
 Você deve informar:
 
@@ -179,12 +154,6 @@ O formato da sua resposta deve ser:
 
 <BEGIN-HUMOR>[1, 2 ou 3]<END-HUMOR>
 ```
-
-=========
-
-INSTRUÇÕES IMPORTANTES:
-1. SIGA SEMPRE A SEQUÊNCIA DE INFORMAÇÕES ACIMA, SEM ALTERAR A ORDEM OU ADICIONAR INFORMAÇÕES EXTRAS.
-2. GERE AS RESPOSTAS SEGUINDO ESTRITAMENTE O FORMATO APRESENTADO COM AS TAGS DE INÍCIO E FIM DE CADA SEÇÃO.
                                         </textarea
                                             >
                                         </div>

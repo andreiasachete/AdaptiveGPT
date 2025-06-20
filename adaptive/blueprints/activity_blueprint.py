@@ -256,25 +256,12 @@ def generate_question(activity_id: int, student_id: int, always_change_question_
     # number of questions is answered correctly (activity.min_questions).
     if len(trajectory.questions) == 0:
         difficulty = 1
-        difficulty_increased = False
     else:
         last_answered_question = trajectory.last_answered_question
         if last_answered_question is not None:
             difficulty = int(last_answered_question.difficulty)
             if last_answered_question.student_answer.correctness == 3:
                 difficulty = min(3, difficulty + 1)
-                difficulty_increased = True
-
-    # If the difficulty level has been increased, we ensure that the next question is generated
-    # with a different context to provide a better experience for the student. Specifically:
-    # 1. IF difficulty has been increased: "reverse_order" = False, as we want to change the context.
-    # 2. IF difficulty has not been increased: "reverse_order" = True, as we want to keep the context.
-    # The condition "always_change_question_context" allows the user to force the change of context
-    # regardless of changes in difficulty level.
-    if difficulty_increased or always_change_question_context:
-        reversed_order = False
-    else:
-        reversed_order = True
 
     # Selecting one of the text chunks of the activity to generate a question. To provide a better experience for the student,
     # we sort the text chunks in such a way that chunks less frequently used in previous questions within the trajectory are
@@ -286,7 +273,7 @@ def generate_question(activity_id: int, student_id: int, always_change_question_
 
     # Sorting the text chunks (dict keys) based on the number of times they were used in
     # previous questions (dict values) and transforming the sorted keys into a list of text chunks
-    sorted_text_chunks = [key for key, value in sorted(text_chunks.items(), key=lambda item: item[1], reverse=reversed_order)]
+    sorted_text_chunks = [key for key, value in sorted(text_chunks.items(), key=lambda item: item[1], reverse=always_change_question_context)]
 
     # Selecting the first text chunk of the sorted list to generate a question
     text_chunk = EntityManager.session().query(TextChunk).filter_by(identifier=sorted_text_chunks[0]).first()
@@ -442,6 +429,18 @@ def process_student_answer_and_advance_trajectory(question_id: int):
 
         ---- Resposta Esperada ----
         {question.answer}
+
+        OBSERVAÇÕES:
+
+        Para avaliar a resposta do estudante, considere os seguintes critérios:
+        - Correção: A resposta está correta?
+        - Completação: A resposta está completa?
+        - Clareza: A resposta é clara e compreensível?
+        - Relevância: A resposta é relevante para a pergunta?
+
+        Mesmo que o estudante não tenha fornecido exatamente a resposta esperada, considere se ele demonstrou compreensão do assunto e se sua resposta é válida dentro do contexto da pergunta.
+        
+        Pense profundamente e de forma crítica sobre a resposta do estudante, levando em conta os critérios acima. No entanto, assuma o papel de um professor flexível e compreensivo. Interprete a resposta à luz do contexto, embora redigida de forma distinta.
         """
     )
 

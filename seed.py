@@ -113,7 +113,7 @@ def mock_all_data():
                 print(f"\nArquivo JSON criado para hospedar os registros da entidade TextChunk: {text_chunks_file_path}\n")
 
                 # Creating instances of the Student class and linking them to the subject
-                for _ in range(2):
+                for _ in range(30):
                     student_count += 1
                     print(f"Criando Student_{student_count}")
                     student = Student(
