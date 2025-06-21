@@ -3,6 +3,7 @@ from adaptive import create_app
 from adaptive.models import *
 
 # Importing built-in modules
+import argparse
 from random import choice, randint, random
 from hashlib import sha256
 from time import time
@@ -17,7 +18,7 @@ app = create_app()
 UPLOAD_DIRECTORY = path.join(getcwd(), "adaptive/assets/uploads")
 
 
-def mock_all_data():
+def mock_all_data(create_questions: bool = False) -> None:
     # Defining a Faker instance for generating random data
     faker_instance = Faker(locale="pt_BR")
 
@@ -132,27 +133,33 @@ def mock_all_data():
                     print(f"Criando Trajectory_{student_count}")
 
                     # Creating questions for the trajectory
-                    for j in range(10):
-                        print(f"Criando Question_{j} para o Student_{student_count}")
-                        question = Question(
-                            body=faker_instance.sentence(),
-                            answer=faker_instance.word(),
-                            difficulty=1,
-                            text_chunk_id=choice(TextChunk.all()).id,
-                            trajectory_id=trajectory.id,
-                        )
-                        StudentAnswer(
-                            content=faker_instance.word(),
-                            correctness=choice([1, 2, 3]),
-                            descriptive_feedback=faker_instance.sentence(),
-                            sentiment=choice(["Confiança", "Entusiasmo", "Insegurança", "Indiferença"]),
-                            humor=choice(["Positivo", "Negativo", "Neutro"]),
-                            question_id=question.id,
-                        )
-                        print(f"Criando StudentAnswer_{j} para a Question_{j} do Student_{student_count}")
+                    if create_questions:
+                        for j in range(10):
+                            print(f"Criando Question_{j} para o Student_{student_count}")
+                            question = Question(
+                                body=faker_instance.sentence(),
+                                answer=faker_instance.word(),
+                                difficulty=1,
+                                text_chunk_id=choice(TextChunk.all()).id,
+                                trajectory_id=trajectory.id,
+                            )
+                            StudentAnswer(
+                                content=faker_instance.word(),
+                                correctness=choice([1, 2, 3]),
+                                descriptive_feedback=faker_instance.sentence(),
+                                sentiment=choice(["Confiança", "Entusiasmo", "Insegurança", "Indiferença"]),
+                                humor=choice(["Positivo", "Negativo", "Neutro"]),
+                                question_id=question.id,
+                            )
+                            print(f"Criando StudentAnswer_{j} para a Question_{j} do Student_{student_count}")
 
 
 if __name__ == "__main__":
+    # Receiving a named argument with the flag "--create-questions" to create mock data
+    parser = argparse.ArgumentParser(description="Gerar dados mock para o Adaptive Learning System.")
+    parser.add_argument("--create-questions", action="store_true", help="Criar dados mock para o Adaptive Learning System.")
+    args = parser.parse_args()
+
     with app.app_context():
-        mock_all_data()
+        mock_all_data(create_questions=args.create_questions)
         print("\n\n\n==== Dados mock inseridos com sucesso ====\n\n\n")
