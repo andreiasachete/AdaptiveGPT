@@ -21,8 +21,7 @@ class EntityManager:
 
         # Confirming the transaction
         current_session.commit()
-
-        print(f"Instância {self} criada com sucesso.")
+        current_session.flush()
 
         return self
 
@@ -32,7 +31,8 @@ class EntityManager:
         Returns:
             obj (str): Object representation
         """
-        return f"{self.__class__.__name__}_{self.id}"
+        entity_id = self.__dict__.get("id")
+        return f"{self.__class__.__name__}_{entity_id or 'unsaved'}"
 
     def __repr__(self) -> str:
         """Defines how the object is represented inside the console.
@@ -40,7 +40,8 @@ class EntityManager:
         Returns:
             str: Object representation.
         """
-        return f"{self.__class__.__name__}_{self.id}"
+        entity_id = self.__dict__.get("id")
+        return f"{self.__class__.__name__}_{entity_id or 'unsaved'}"
 
     @classmethod
     def all(cls) -> list:

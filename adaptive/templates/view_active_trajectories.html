@@ -54,10 +54,10 @@
                                     <table class="w-full my-0 align-middle text-dark border-neutral-200">
                                         <thead class="align-bottom">
                                             <tr class="font-semibold text-[0.95rem] text-secondary-dark">
-                                                <th class="pb-3 text-start min-w-[150px]">Material-Base</th>
+                                                <th class="pb-3 text-start min-w-[100px]">Material-Base</th>
                                                 <th class="pb-3 text-start min-w-[100px]">Dificuldade</th>
                                                 <th class="pb-3 text-start min-w-[250px]">Enunciado</th>
-                                                <th class="pb-3 text-center min-w-[60px]">Ações</th>
+                                                <th class="pb-3 text-center min-w-[80px]">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -66,7 +66,7 @@
                                                 <td class="p-3 pl-0">
                                                     <div class="flex items-center">
                                                         <div class="flex flex-col justify-start">
-                                                            <a href="{{ url_for('static', filename='uploads/'+trajectory.activity.base_material) }}" target="_blank" class="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary">{{ trajectory.activity.base_material }}</a>
+                                                            <a href="{{ url_for('static', filename='uploads/'+trajectory.activity.base_material) }}" target="_blank" class="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary"><small>{{ trajectory.activity.base_material }}</small></a>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -85,7 +85,7 @@
                                                     <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question['difficulty'] }}</span>
                                                 </td>
                                                 <td class="p-3 pr-0 text-start">
-                                                    <span class="font-semibold text-light-inverse text-md/normal">{{ trajectory.last_unanswered_question['body'] }}</span>
+                                                    <span class="font-semibold text-light-inverse text-md/normal"><small>{{ trajectory.last_unanswered_question['body'] }}</small></span>
                                                 </td>
                                                 <td class="p-3 pr-0 text-center">
                                                     <button

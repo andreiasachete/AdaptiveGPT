@@ -11,10 +11,7 @@ app = create_app()
 
 if __name__ == "__main__":
     # Defining the proper method to spawn processes depending on the platform
-    if platform == "darwin":
-        set_start_method("fork", force=True)
-    else:
-        set_start_method("spawn", force=True)
+    set_start_method("spawn", force=True)
 
     # Getting the environment variables
     load_dotenv(dotenv_path=".env")

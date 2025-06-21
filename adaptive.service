@@ -12,7 +12,7 @@ User=root
 Group=www-data
 WorkingDirectory=/home/fabiorossi/AdaptiveGPT
 
-ExecStart=/root/.cache/pypoetry/virtualenvs/adaptive-C9QxaqfR-py3.10/bin/gunicorn -w 8 -b 0.0.0.0:80 adaptive:app --timeout 3600 --access-logfile /home/fabiorossi/AdaptiveGPT/gunicorn_accesses.log --error-logfile /home/fabiorossi/AdaptiveGPT/gunicorn_errors.log --log-level debug
+ExecStart=/root/.cache/pypoetry/virtualenvs/adaptive-C9QxaqfR-py3.12/bin/python -B -m adaptive
 
 Restart=always
 RestartSec=5
