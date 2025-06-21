@@ -25,7 +25,7 @@ from adaptive.blueprints.generic_blueprint import require_authentication
 
 # Importing Flask packages and modules
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
-from docling.document_converter import DocumentConverter
+from pypdf import PdfReader
 from ftfy import fix_text
 from werkzeug.utils import secure_filename
 from langchain_groq import ChatGroq
@@ -38,7 +38,7 @@ activity_blueprint = Blueprint("activity_blueprint", __name__, url_prefix="/")
 # Defining constants for PDF file handling
 UPLOAD_DIRECTORY = path.join(getcwd(), "adaptive/assets/uploads")
 ALLOWED_EXTENSIONS = {"pdf"}  # Only PDF files are allowed
-MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # The resulting file size should not exceed 5 MB
+MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # The resulting file size should not exceed 5 MB
 ACCENT_REPLACEMENTS = {
     r"\'a": "a",
     r"'a": "à",
@@ -50,6 +50,7 @@ ACCENT_REPLACEMENTS = {
     r"c¸ ˜a": "çã",
     r"c¸ ˜o": "çõ",
     r"c¸": "ç",
+    r"c ¸": "ç",
     r"˜a": "ã",
     r"˜o": "õ",
     r"ˆe": "ê",
@@ -58,6 +59,7 @@ ACCENT_REPLACEMENTS = {
     r"`a": "à",
     r"`e": "è",
     r"`i": "ì",
+    r"´ı": "í",
     r"`o": "ò",
     r"`u": "ù",
     r"¨a": "ä",
@@ -74,10 +76,12 @@ ACCENT_REPLACEMENTS = {
     r"´u": "ú",
     r"\'ı": "í",
     r"r\'a": "rá",
+    r" á": "á",
+    r" ó": "ó",
 }
 
 # Defining constants for LLM interaction
-MAX_TOKENS = 2500  # The maximum number of tokens per text chunk
+MAX_TOKENS = 2000  # The maximum number of tokens per text chunk
 LLM_PROVIDER = "groq"  # The Large Language Model provider (options: "groq", "gemini")
 
 # Defining static feedback messages for the student based on the correctness of the answer
@@ -350,18 +354,23 @@ def process_pdf_and_create_questions(activity_id: object, file_path: str):
     from adaptive.models.entity_manager import EntityManager
 
     with app.app_context():
-        sleep(0.5)
+        # sleep(0.5)
         activity = EntityManager.session().query(Activity).filter_by(id=activity_id).first()
         if not activity:
             return
 
         # Processing the PDF file content
-        converter = DocumentConverter()
-        raw_text = converter.convert(file_path).document.export_to_text()
-        text = fix_accents(raw_text)
+        reader = PdfReader(file_path)
+        raw_text = ""
+        for page in reader.pages:
+            page_text = page.extract_text() or ""
+            raw_text += page_text
+
+        # Fixing the text to ensure it is properly formatted
+        raw_text = sub("- ", "", sub(r"\s+", " ", fix_accents(raw_text))).strip()
 
         # Splitting the text into parts with a maximum of tokens (this value should be adjusted according to the model's requirements)
-        raw_text_chunks = split_text(text, MAX_TOKENS)
+        raw_text_chunks = split_text(raw_text, MAX_TOKENS)
 
         # Creating JSON file to store the text chunks and pushing the text chunks into the file
         text_chunks = []
@@ -377,7 +386,7 @@ def process_pdf_and_create_questions(activity_id: object, file_path: str):
 
             # Creating a TextChunk instance in the database
             TextChunk(identifier=identifier, activity_id=activity.id)
-            print(f"{text_chunk}")
+            print(f"\n\n\n{text_chunk}\n\n\n")
         print("\n\n")
 
         # Storing the text chunks into the JSON file
